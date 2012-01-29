@@ -24,13 +24,33 @@ Deck : NSObject
 Node : NSObject 
 {
   nodeid
+  nodecache (class instance variable)
 
-  - initWithCards: cards
+  + initialize
+  {
+    nodecache := #{}
+  }
+
+  + getOrCreateNode: cards
+  {
+    | node id |
+    id := Deck idFromCards: cards.
+    node := nodecache valueForKey: id.
+
+    (node ~~ nil) ifFalse:
+    [
+      node := Node alloc initWithId: id.
+      nodecache setValue: node forKey: id.
+    ].
+    ^ node
+  }
+
+  - initWithId: id
   {
     self := super init.
-    (self isEqual: nil) ifFalse:
+    (self ~~ nil) ifTrue:
     [
-      nodeid := Deck idFromCards: cards
+      nodeid := id
     ].
     ^ self
   }
@@ -38,7 +58,8 @@ Node : NSObject
   - nodeid { ^ nodeid }
 }.
 
-Deck initialize.
 
-root := Node alloc initWithCards: { 'J', 'A', '7', '2' }.
-root nodeid.
+node1 := Node getOrCreateNode: { 'J', 'A', '7', '2' }.
+node2 := Node getOrCreateNode: { 'A', 'J', '2', '7' }.
+
+node1 isEqual: node2.
