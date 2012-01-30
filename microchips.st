@@ -1,4 +1,13 @@
 
+ranks := {'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'}
+id := [:a :b | { a, b } \ #++ ]
+sort := [:c | c at: (ranks !@ c) sort]
+
+level0 := ranks subpartsOfSize:1
+level1 := (sort value: @((level0 @1 ++ @2 level0) \ #++)) distinct
+level2 := (sort value: @((level1 @1 ++ @2 level1) \ #++)) distinct
+level3 := (sort value: @((level2 @1 ++ @2 level2) \ #++)) distinct
+
 Deck : NSObject
 {
   suits (class instance variable)
@@ -37,7 +46,7 @@ Node : NSObject
     id := Deck idFromCards: cards.
     node := nodecache valueForKey: id.
 
-    (node ~~ nil) ifFalse:
+    (node == nil) ifTrue:
     [
       node := Node alloc initWithId: id.
       nodecache setValue: node forKey: id.
@@ -48,7 +57,7 @@ Node : NSObject
   - initWithId: id
   {
     self := super init.
-    (self ~~ nil) ifTrue:
+    (self == nil) ifFalse:
     [
       nodeid := id
     ].
