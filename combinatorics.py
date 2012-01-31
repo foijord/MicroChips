@@ -24,36 +24,33 @@ def combinations(items, n):
             for cc in combinations(items[i+1:],n-1):
                 yield [items[i]]+cc
             
-def combinations_with_replacement(iterable, r):
-    pool = tuple(iterable)
-    n = len(pool)
-    if not n and r:
-        return
-    indices = [0] * r
-    yield [pool[i] for i in indices]
+def combinations_with_replacement(items, n):
+    indices = [0] * n
+    yield [items[i] for i in indices]
     while True:
-        for i in reversed(range(r)):
-            if indices[i] != n - 1:
+        for i in reversed(range(n)):
+            if indices[i] != len(items) - 1:
                 break
         else:
             return
-        indices[i:] = [indices[i] + 1] * (r - i)
-        yield [pool[i] for i in indices]
+        indices[i:] = [indices[i] + 1] * (n - i)
+        yield [items[i] for i in indices]
 
 def main(argv):
-    print "permutations"
+
+    print "permutations:"
     for c in permutations(argv, len(argv)):
         print c
 
-    print "permutations with replacement"
+    print "permutations with replacement:"
     for c in permutations_with_replacement(argv, len(argv)):
         print c
 
-    print "combinations"
+    print "combinations:"
     for c in combinations(argv, len(argv)):
         print c
 
-    print "combinations with replacement"
+    print "combinations with replacement:"
     for c in combinations_with_replacement(argv, len(argv)):
         print c
 
