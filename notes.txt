@@ -1,0 +1,27 @@
+
+Combinations with repetition:     
+choose r out of n: order does not matter, you can repeat!
+
+(n + r - 1)! / r!(n - 1)!
+
+level 0: (r = 1, n = 3)
+3! / 1! * 2! = 6 / 2 = 3
+
+level 1: (r = 2, n = 3)
+4! / 2! * 2! = 24 / 4 = 6
+
+level 2: (r = 3, n = 3)
+5! / 3! * 2! = 120 / 12 = 10
+
+3-card deck, assuming (at least) 3 suits gives the following combinations:
+
+1 11 111 
+2 12 112 
+3 13 113 
+  22 122 
+  23 123 
+  33 133 
+     222 
+     223 
+     233 
+     333 
