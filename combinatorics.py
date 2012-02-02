@@ -1,8 +1,10 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import sys
 import argparse
 import itertools
+
+ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2']
 
 def main():
     parser = argparse.ArgumentParser(
@@ -14,7 +16,7 @@ def main():
 
     args = parser.parse_args()
     method = itertools.combinations_with_replacement if args.t else itertools.combinations
-    for c in method(args.n, args.r): print(list(c))
+    for c in method(args.n, args.r): print(''.join(sorted(list(c), key = ranks.index)))
 
     sys.exit(1)
 
