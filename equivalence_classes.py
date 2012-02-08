@@ -32,21 +32,21 @@ def print_class(hand, name):
     equivalence_class += 1
 
 def print_straights(flush):
+    name = "Straight Flush" if flush else "Straight"
     for s in straights:
-        name = "Straight Flush" if flush else "Straight"
         print_class(s, name)
 
 def print_filled_hands(m, n):
+    name = "Four of a Kind" if m == 4 else "Full House"
     for i in range(13):
         for j in range(12):
-            name = "Four of a Kind" if m == 4 else "Full House"
             r = list(ranks)
             r.remove(ranks[i])
             print_class(ranks[i] * m + r[j] * n, name)
 
 def print_high_cards(flush):
+    name = "Flush" if flush else "High Card"
     for h in highcards:
-        name = "Flush" if flush else "High Card"
         print_class(h, name)
 
 def print_trips():
@@ -63,7 +63,7 @@ def print_two_pair():
             r.remove(ranks[i])
             r.remove(ranks[j])
             for k in r:
-                print_class(ranks[i] * 2 + ranks[j] * 2 + k, "Two Pairs")
+                print_class(ranks[i] * 2 + ranks[j] * 2 + k, "Two Pair")
 
 def print_pairs():
     for i in range(13):
