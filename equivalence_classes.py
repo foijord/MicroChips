@@ -1,11 +1,11 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import sys
 import itertools
 
 ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2']
 
-equivalence_class = 1
+equivalence_class = 7462
 highcards = []
 straights = []
 
@@ -29,7 +29,7 @@ def init_highcards():
 def print_class(hand, name):
     global equivalence_class
     print(key(hand) + "\t" + str(equivalence_class) + "\t" + name)
-    equivalence_class += 1
+    equivalence_class -= 1
 
 def print_straights(flush):
     name = "Straight Flush" if flush else "Straight"
