@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import sys
-import itertools
+from combinations import *
 
 ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2']
 
@@ -21,7 +21,7 @@ def init_highcards():
     r = list(ranks)
     for i in range(13):
         r.remove(ranks[i])
-        for c in itertools.combinations(r, 4):
+        for c in combinations(r, 4):
             hand = key(ranks[i] + ''.join(list(c)))
             if not hand in straights:
                 highcards.append(hand)
@@ -53,7 +53,7 @@ def print_trips():
     for i in range(13):
         r = list(ranks)
         r.remove(ranks[i])
-        for c in itertools.combinations(r, 2):
+        for c in combinations(r, 2):
             print_class(ranks[i] * 3 + ''.join(list(c)), "Three of a Kind")
 
 def print_two_pair():
@@ -69,7 +69,7 @@ def print_pairs():
     for i in range(13):
         r = list(ranks)
         r.remove(ranks[i])
-        for c in itertools.combinations(r, 3):
+        for c in combinations(r, 3):
             print_class(ranks[i] * 2 + ''.join(list(c)), "Pair")
 
 def main():
