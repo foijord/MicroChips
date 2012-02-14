@@ -4,12 +4,8 @@ import sys
 import os
 
 import Constants
-from combinations import *
-import itertools
+from itertools import *
 
-card_ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2']
-card_suits = ['s', 'h', 'c', 'd']
-face_deck = [rank + suit for rank in card_ranks for suit in card_suits]
 rank_keys = [1479181, 636345, 262349, 83661, 22854, 8698, 2031, 453, 98, 22, 5, 1, 0]
 flush_keys = [4016, 2016, 1012, 508, 255, 128, 64, 32, 16, 8, 4, 2, 1]
 suit_keys = [57, 8, 1, 0]
@@ -66,7 +62,7 @@ class SevenEval:
         five_eval = FiveEval()
 
         # All combinations, except flushes
-        for c in itertools.combinations_with_replacement([i for i in range(13)], 7):
+        for c in combinations_with_replacement([i for i in range(13)], 7):
             #peel off invalid hands
             card_count = [c.count(c[i]) for i in range(7)]
             if (max(card_count) < 5):
@@ -81,7 +77,7 @@ class SevenEval:
                                 
      
         # 7-card flush.
-        for c in itertools.combinations_with_replacement(suit_keys, 7):
+        for c in combinations_with_replacement(suit_keys, 7):
             suit_count = [c.count(suit_keys[i]) for i in range(4)]
             max_count = max(suit_count)
             if max_count > 4:
@@ -124,11 +120,26 @@ def testFiveEval():
     print(counts)
 
 def testSevenEval():
+    deck = [i for i in range(52)]
     seven_eval = SevenEval()
+
+    counts = [0] * 7462
+    for c in combinations(deck, 7):
+        rank = seven_eval.getRankOfSeven(c[0], c[1], c[2], c[3], c[4], c[5], c[6])
+        counts[rank - 1] += 1
+
+    print(counts)
+
+    """
+    card_ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2']
+    card_suits = ['s', 'h', 'c', 'd']
+    face_deck = [rank + suit for rank in card_ranks for suit in card_suits]
+    
     d = dict([(c, face_deck.index(c)) for c in face_deck])
     print(seven_eval.getRankOfSeven(d['As'], d['Kc'], d['Qs'], d['Js'], d['Ts'], d['2c'], d['2d']))
     print(seven_eval.getRankOfSeven(d['As'], d['Ks'], d['Qs'], d['Js'], d['Ts'], d['2s'], d['2h']))
     print(seven_eval.getRankOfSeven(d['As'], d['Ks'], d['Qs'], d['Js'], d['Ts'], d['3s'], d['2s']))
-
+    """
+    
 if __name__ == "__main__":
     testSevenEval()
