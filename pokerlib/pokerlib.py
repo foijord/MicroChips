@@ -9,14 +9,14 @@ from itertools import *
 card_ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2']
 card_suits = ['s', 'h', 'c', 'd']
 rank_keys = [1479181, 636345, 262349, 83661, 22854, 8698, 2031, 453, 98, 22, 5, 1, 0]
-flush_keys = [4016, 2016, 1012, 508, 255, 128, 64, 32, 16, 8, 4, 2, 1]
+flush_keys = [1 << i for i in range(13)]
 suit_keys = [57, 8, 1, 0]
 
 class FiveEval:
     def __init__(self) :
                 
         self.ranks = [0] * (Constants.MAX_SEVEN_NONFLUSH_KEY_INT + 1)
-        self.flushes = [0] * (Constants.MAX_FIVE_FLUSH_KEY_INT + 1)
+        self.flushes = [0] * (4096 + 2048 + 1024 + 512 + 256 + 1)
                 
         equivalence_classes = open("equivalence_classes.dat", 'r')
         for line in equivalence_classes:
@@ -57,7 +57,7 @@ class FiveEval:
 class SevenEval:
     def __init__(self):
         self.ranks = [0] * (Constants.MAX_SEVEN_NONFLUSH_KEY_INT + 1)
-        self.flushes = [0] * (Constants.MAX_SEVEN_FLUSH_KEY_INT + 1)
+        self.flushes = [0] * (4096 + 2048 + 1024 + 512 + 256 + 128 + 64 + 1)
         self.flushCheck = [-1] * (Constants.MAX_FLUSH_CHECK_SUM + 1)
         self.deck_keys = [(rank_keys[n >> 2] << Constants.NON_FLUSH_BIT_SHIFT) + suit_keys[n & 3] for n in range(52)]
         
@@ -114,7 +114,7 @@ def testFiveEval():
     deck = [i for i in range(52)]
     five_eval = FiveEval()
     counts = [0] * 7462
-    
+
     for hand in combinations(deck, 5):
         rank = five_eval.getRankOfFive(hand[0], hand[1], hand[2], hand[3], hand[4])
         counts[rank - 1] += 1
@@ -132,7 +132,6 @@ def testSevenEval():
 
     print(counts)
     """
-
     face_deck = [rank + suit for rank in card_ranks for suit in card_suits]
     
     d = dict([(c, face_deck.index(c)) for c in face_deck])
@@ -142,4 +141,4 @@ def testSevenEval():
 
     
 if __name__ == "__main__":
-    testSevenEval()
+    testFiveEval()
