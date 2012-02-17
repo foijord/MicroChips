@@ -18,13 +18,10 @@ def init_straights():
         straights.append(key(''.join(r[i:i+5])))
 
 def init_highcards():
-    r = list(ranks)
-    for i in range(13):
-        r.remove(ranks[i])
-        for c in combinations(r, 4):
-            hand = key(ranks[i] + ''.join(list(c)))
-            if not hand in straights:
-                highcards.append(hand)
+    for c in combinations(ranks, 5):
+        hand = key(''.join(list(c)))
+        if not hand in straights:
+            highcards.append(hand)
 
 def print_class(hand, name):
     global equivalence_class

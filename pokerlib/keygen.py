@@ -4,51 +4,23 @@ import sys
 from itertools import *
 
 def checkSuitKeys(keys):
-    sums = []
-    for c in combinations_with_replacement(keys, 7):
-        sums.append(sum(c))
-
-    for s in sums:
-        if sums.count(s) > 1:
-            return False
-
-    return True
+    sums = [sum(c) for c in combinations_with_replacement(keys, 7)]
+    return len(sums) == len(set(sums))
 
 def checkRankKeys(keys):
-    sums = []
-    for c in combinations_with_replacement(keys, 5):
-        count = [c.count(i) for i in c]
-        if max(count) < 5:
-            sums.append(sum(c))
+    sums = [sum(c) for c in combinations_with_replacement(keys, 7) if max([c.count(i) for i in c]) < 5]
+    return len(sums) == len(set(sums))
 
-    for s in sums:
-        if sums.count(s) > 1:
-            return False
-
-    return True
-
-def generateRankKeys():
-    keys = [0] * 2
-    while len(keys) <= 13:
-        accepted = False
-        while not accepted:
+def generateKeys(n, keycheck):
+    keys = [0]
+    while len(keys) < n:
+        keys.append(keys[-1])
+        while True:
             keys[-1] += 1
-            accepted = checkRankKeys(keys)
-            if accepted:
+            if keycheck(keys):
                 print(keys)
-                keys.append(keys[-1])
+                break
 
-
-def generateSuitKeys():
-    keys = [0] * 2
-    while len(keys) <= 4:
-        accepted = False
-        while not accepted:
-            keys[-1] += 1
-            accepted = checkSuitKeys(keys)
-            if accepted:
-                print(keys)
-                keys.append(keys[-1])
 
 if __name__ == "__main__":
-    generateSuitKeys()
+    generateKeys(5, checkRankKeys)
