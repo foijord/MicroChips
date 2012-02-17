@@ -12,14 +12,15 @@ def checkRankKeys(keys):
     return len(sums) == len(set(sums))
 
 def generateKeys(n, keycheck):
-    keys = [0] * 2
-    while len(keys) <= n:
+    keys = [0]
+    while len(keys) < n:
+        keys.append(keys[-1])
         while True:
             keys[-1] += 1
             if keycheck(keys):
                 print(keys)
-                keys.append(keys[-1])
                 break
 
+
 if __name__ == "__main__":
-    generateKeys(8, checkRankKeys)
+    generateKeys(5, checkRankKeys)
