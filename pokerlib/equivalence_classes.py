@@ -1,24 +1,22 @@
 #!/usr/bin/env python
 
-import sys
-from combinations import *
-
-ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2']
+from itertools import *
+from constants import *
 
 equivalence_class = 7462
 highcards = []
 straights = []
 
 def key(hand):
-    return ''.join(sorted(list(hand), key = ranks.index))
+    return ''.join(sorted(list(hand), key = card_ranks.index))
 
 def init_straights():
-    r = list(ranks) + ['A']
+    r = list(card_ranks) + ['A']
     for i in range(10):
         straights.append(key(''.join(r[i:i+5])))
 
 def init_highcards():
-    for c in combinations(ranks, 5):
+    for c in combinations(card_ranks, 5):
         hand = key(''.join(list(c)))
         if not hand in straights:
             highcards.append(hand)
@@ -37,9 +35,9 @@ def print_filled_hands(m, n):
     name = "Four of a Kind" if m == 4 else "Full House"
     for i in range(13):
         for j in range(12):
-            r = list(ranks)
-            r.remove(ranks[i])
-            print_class(ranks[i] * m + r[j] * n, name)
+            r = list(card_ranks)
+            r.remove(card_ranks[i])
+            print_class(card_ranks[i] * m + r[j] * n, name)
 
 def print_high_cards(flush):
     name = "Flush" if flush else "High Card"
@@ -48,26 +46,26 @@ def print_high_cards(flush):
 
 def print_trips():
     for i in range(13):
-        r = list(ranks)
-        r.remove(ranks[i])
+        r = list(card_ranks)
+        r.remove(card_ranks[i])
         for c in combinations(r, 2):
-            print_class(ranks[i] * 3 + ''.join(list(c)), "Three of a Kind")
+            print_class(card_ranks[i] * 3 + ''.join(list(c)), "Three of a Kind")
 
 def print_two_pair():
     for i in range(13):
         for j in range(i+1, 13):
-            r = list(ranks)
-            r.remove(ranks[i])
-            r.remove(ranks[j])
+            r = list(card_ranks)
+            r.remove(card_ranks[i])
+            r.remove(card_ranks[j])
             for k in r:
-                print_class(ranks[i] * 2 + ranks[j] * 2 + k, "Two Pair")
+                print_class(card_ranks[i] * 2 + card_ranks[j] * 2 + k, "Two Pair")
 
 def print_pairs():
     for i in range(13):
-        r = list(ranks)
-        r.remove(ranks[i])
+        r = list(card_ranks)
+        r.remove(card_ranks[i])
         for c in combinations(r, 3):
-            print_class(ranks[i] * 2 + ''.join(list(c)), "Pair")
+            print_class(card_ranks[i] * 2 + ''.join(list(c)), "Pair")
 
 def main():
     init_straights()

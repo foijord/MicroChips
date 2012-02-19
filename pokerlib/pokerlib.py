@@ -3,20 +3,14 @@
 import sys
 import os
 
-import Constants
 from itertools import *
-
-card_ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2']
-card_suits = ['s', 'h', 'c', 'd']
-rank_keys = [1479181, 636345, 262349, 83661, 22854, 8698, 2031, 453, 98, 22, 5, 1, 0]
-flush_keys = [1 << i for i in range(13)]
-suit_keys = [57, 8, 1, 0]
+from constants import *
 
 class FiveEval:
     def __init__(self) :
                 
-        self.ranks = [0] * (Constants.MAX_SEVEN_NONFLUSH_KEY_INT + 1)
-        self.flushes = [0] * (4096 + 2048 + 1024 + 512 + 256 + 1)
+        self.ranks = [0] * (max_5_card_rank + 1)
+        self.flushes = [0] * (max_5_card_flush_key + 1)
                 
         equivalence_classes = open("equivalence_classes.dat", 'r')
         for line in equivalence_classes:
@@ -26,7 +20,7 @@ class FiveEval:
                 key = sum([flush_keys[c] for c in [card_ranks.index(c) for c in columns[0]]])
                 self.flushes[key] = int(columns[1])
             else:
-                key = sum([rank_keys[c] for c in [card_ranks.index(c) for c in columns[0]]])
+                key = sum([rank_keys5[c] for c in [card_ranks.index(c) for c in columns[0]]])
                 self.ranks[key] = int(columns[1])
                                 
     def getRankOfFive(self, c1, c2, c3, c4, c5) :
@@ -38,11 +32,11 @@ class FiveEval:
                                 flush_keys[c5 >> 2]]
                 
         else:
-            return self.ranks[rank_keys[c1 >> 2] +
-                              rank_keys[c2 >> 2] +
-                              rank_keys[c3 >> 2] +
-                              rank_keys[c4 >> 2] +
-                              rank_keys[c5 >> 2]]
+            return self.ranks[rank_keys5[c1 >> 2] +
+                              rank_keys5[c2 >> 2] +
+                              rank_keys5[c3 >> 2] +
+                              rank_keys5[c4 >> 2] +
+                              rank_keys5[c5 >> 2]]
 
     def getRank(self, hand):
         best_rank = 0
@@ -56,10 +50,10 @@ class FiveEval:
 
 class SevenEval:
     def __init__(self):
-        self.ranks = [0] * (Constants.MAX_SEVEN_NONFLUSH_KEY_INT + 1)
-        self.flushes = [0] * (4096 + 2048 + 1024 + 512 + 256 + 128 + 64 + 1)
-        self.flushCheck = [-1] * (Constants.MAX_FLUSH_CHECK_SUM + 1)
-        self.deck_keys = [(rank_keys[n >> 2] << Constants.NON_FLUSH_BIT_SHIFT) + suit_keys[n & 3] for n in range(52)]
+        self.ranks = [0] * (max_7_card_rank + 1)
+        self.flushes = [0] * (max_7_card_flush_key + 1)
+        self.flushCheck = [-1] * (7 * max(suit_keys) + 1)
+        self.deck_keys = [(rank_keys7[n >> 2] << flush_bit_shift) + suit_keys[n & 3] for n in range(52)]
         
         five_eval = FiveEval()
 
@@ -68,7 +62,7 @@ class SevenEval:
             #peel off invalid hands
             card_count = [c.count(c[i]) for i in range(7)]
             if (max(card_count) < 5):
-                key = sum([rank_keys[i] for i in c])
+                key = sum([rank_keys7[i] for i in c])
                 self.ranks[key] = five_eval.getRank([c[0]*4, c[1]*4, c[2]*4, c[3]*4, c[4]*4+1, c[5]*4+1, c[6]*4+1])
 
         # Flush ranks.
@@ -76,8 +70,7 @@ class SevenEval:
             for c in combinations([i for i in range(13)], n):
                 key = sum([flush_keys[c[i]] for i in range(0, n)])
                 self.flushes[key] = five_eval.getRank([i * 4 for i in c])
-                                
-     
+
         # 7-card flush.
         for c in combinations_with_replacement(suit_keys, 7):
             suit_count = [c.count(suit_keys[i]) for i in range(4)]
@@ -89,14 +82,20 @@ class SevenEval:
 
     def getRankOfSeven(self, c1, c2, c3, c4, c5, c6, c7):
         # Create a 7-card hand key by adding up each of the card keys.
-        key = self.deck_keys[c1] + self.deck_keys[c2] + self.deck_keys[c3] + self.deck_keys[c4] + self.deck_keys[c5] + self.deck_keys[c6] + self.deck_keys[c7]
+        key = self.deck_keys[c1] + \
+            self.deck_keys[c2] + \
+            self.deck_keys[c3] + \
+            self.deck_keys[c4] + \
+            self.deck_keys[c5] + \
+            self.deck_keys[c6] + \
+            self.deck_keys[c7]
 
         # Tear off the flush check strip.
-        flush_suit = self.flushCheck[key & Constants.SUIT_BIT_MASK]
+        flush_suit = self.flushCheck[key & flush_bit_mask]
                 
         if flush_suit < 0:
             # Tear off the non-flush key strip, and look up the rank.
-            return self.ranks[key >> Constants.NON_FLUSH_BIT_SHIFT] 
+            return self.ranks[key >> flush_bit_shift]
         else :
             # Generate a flush key, and look up the rank.
             key = (flush_keys[c1 >> 2] if suit_keys[c1 & 3] == flush_suit else 0) + \
@@ -141,4 +140,4 @@ def testSevenEval():
 
     
 if __name__ == "__main__":
-    testFiveEval()
+    testSevenEval()

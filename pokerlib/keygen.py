@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 
-import sys
 from itertools import *
 
 def checkSuitKeys(keys):
-    sums = [sum(c) for c in combinations_with_replacement(keys, 7)]
+    sums = [sum(c) for c in combinations_with_replacement(keys, 6)]
     return len(sums) == len(set(sums))
 
 def checkRankKeys(keys):
-    sums = [sum(c) for c in combinations_with_replacement(keys, 7) if max([c.count(i) for i in c]) < 5]
+    sums = [sum(c) for c in combinations_with_replacement(keys, 5) if max([c.count(i) for i in c]) < 5]
     return len(sums) == len(set(sums))
 
 def generateKeys(n, keycheck):
@@ -23,4 +22,5 @@ def generateKeys(n, keycheck):
 
 
 if __name__ == "__main__":
-    generateKeys(5, checkRankKeys)
+    generateKeys(4, checkSuitKeys)
+ 
