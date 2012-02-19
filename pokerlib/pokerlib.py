@@ -56,29 +56,28 @@ class SevenEval:
         self.deck_keys = [(rank_keys7[n >> 2] << flush_bit_shift) + suit_keys[n & 3] for n in range(52)]
         
         five_eval = FiveEval()
+        spades = [i * 4 for i in range(13)]
 
         # All combinations, except flushes
-        for c in combinations_with_replacement([i for i in range(13)], 7):
-            #peel off invalid hands
-            card_count = [c.count(c[i]) for i in range(7)]
+        for c in combinations_with_replacement(spades, 7):
+            card_count = [c.count(i) for i in c]
             if (max(card_count) < 5):
-                key = sum([rank_keys7[i] for i in c])
-                self.ranks[key] = five_eval.getRank([c[0]*4, c[1]*4, c[2]*4, c[3]*4, c[4]*4+1, c[5]*4+1, c[6]*4+1])
+                key = sum([rank_keys7[i >> 2] for i in c])
+                self.ranks[key] = five_eval.getRank([c[0], c[1], c[2], c[3], c[4] + 1, c[5] + 1, c[6] + 1])
 
-        # Flush ranks.
+        # All flushes
         for n in [5, 6, 7]:
-            for c in combinations([i for i in range(13)], n):
-                key = sum([flush_keys[c[i]] for i in range(0, n)])
-                self.flushes[key] = five_eval.getRank([i * 4 for i in c])
+            for c in combinations(spades, n):
+                key = sum([flush_keys[i >> 2] for i in c])
+                self.flushes[key] = five_eval.getRank(c)
 
-        # 7-card flush.
+        # Flush checks
         for c in combinations_with_replacement(suit_keys, 7):
-            suit_count = [c.count(suit_keys[i]) for i in range(4)]
+            suit_count = [c.count(i) for i in suit_keys]
             max_count = max(suit_count)
-            if max_count > 4:
-                key = sum(c)
-                suit_index = suit_count.index(max_count)
-                self.flushCheck[key] = suit_keys[suit_index]
+            if max_count >= 5:
+                suit_index = suit_count.index(max_count) 
+                self.flushCheck[sum(c)] = suit_keys[suit_index]
 
     def getRankOfSeven(self, c1, c2, c3, c4, c5, c6, c7):
         # Create a 7-card hand key by adding up each of the card keys.
