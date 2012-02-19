@@ -9,7 +9,7 @@ from constants import *
 class FiveEval:
     def __init__(self) :
                 
-        self.ranks = [0] * (max_5_card_rank + 1)
+        self.ranks = [0] * (max_5_card_rank_key + 1)
         self.flushes = [0] * (max_5_card_flush_key + 1)
                 
         equivalence_classes = open("equivalence_classes.dat", 'r')
@@ -50,10 +50,10 @@ class FiveEval:
 
 class SevenEval:
     def __init__(self):
-        self.ranks = [0] * (max_7_card_rank + 1)
+        self.ranks = [0] * (max_7_card_rank_key + 1)
         self.flushes = [0] * (max_7_card_flush_key + 1)
-        self.flushCheck = [-1] * (7 * max(suit_keys) + 1)
-        self.deck_keys = [(rank_keys7[n >> 2] << flush_bit_shift) + suit_keys[n & 3] for n in range(52)]
+        self.flushCheck = [-1] * (7 * max(suit_keys7) + 1)
+        self.deck_keys = [(rank_keys7[n >> 2] << flush_bit_shift) + suit_keys7[n & 3] for n in range(52)]
         
         five_eval = FiveEval()
         spades = [i * 4 for i in range(13)]
@@ -72,12 +72,12 @@ class SevenEval:
                 self.flushes[key] = five_eval.getRank(c)
 
         # Flush checks
-        for c in combinations_with_replacement(suit_keys, 7):
-            suit_count = [c.count(i) for i in suit_keys]
+        for c in combinations_with_replacement(suit_keys7, 7):
+            suit_count = [c.count(i) for i in suit_keys7]
             max_count = max(suit_count)
             if max_count >= 5:
                 suit_index = suit_count.index(max_count) 
-                self.flushCheck[sum(c)] = suit_keys[suit_index]
+                self.flushCheck[sum(c)] = suit_keys7[suit_index]
 
     def getRankOfSeven(self, c1, c2, c3, c4, c5, c6, c7):
         # Create a 7-card hand key by adding up each of the card keys.
@@ -97,13 +97,13 @@ class SevenEval:
             return self.ranks[key >> flush_bit_shift]
         else :
             # Generate a flush key, and look up the rank.
-            key = (flush_keys[c1 >> 2] if suit_keys[c1 & 3] == flush_suit else 0) + \
-                (flush_keys[c2 >> 2] if suit_keys[c2 & 3] == flush_suit else 0) + \
-                (flush_keys[c3 >> 2] if suit_keys[c3 & 3] == flush_suit else 0) + \
-                (flush_keys[c4 >> 2] if suit_keys[c4 & 3] == flush_suit else 0) + \
-                (flush_keys[c5 >> 2] if suit_keys[c5 & 3] == flush_suit else 0) + \
-                (flush_keys[c6 >> 2] if suit_keys[c6 & 3] == flush_suit else 0) + \
-                (flush_keys[c7 >> 2] if suit_keys[c7 & 3] == flush_suit else 0)
+            key = (flush_keys[c1 >> 2] if suit_keys7[c1 & 3] == flush_suit else 0) + \
+                (flush_keys[c2 >> 2] if suit_keys7[c2 & 3] == flush_suit else 0) + \
+                (flush_keys[c3 >> 2] if suit_keys7[c3 & 3] == flush_suit else 0) + \
+                (flush_keys[c4 >> 2] if suit_keys7[c4 & 3] == flush_suit else 0) + \
+                (flush_keys[c5 >> 2] if suit_keys7[c5 & 3] == flush_suit else 0) + \
+                (flush_keys[c6 >> 2] if suit_keys7[c6 & 3] == flush_suit else 0) + \
+                (flush_keys[c7 >> 2] if suit_keys7[c7 & 3] == flush_suit else 0)
                 
             return self.flushes[key]
 
