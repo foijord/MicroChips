@@ -1,29 +1,37 @@
-#!/usr/bin/env python
-# port to C...
+#include <stdio.h>
 
-def comb(c, n, k):
-    j = k - 1
+int comb(int * c, int n, int k)
+{
+  int j = k - 1;
 
-    if c[j] < n - 1:
-        c[j] += 1
-        return True
+  if (c[j] < n - 1) {
+    c[j] += 1;
+    return 1;
+  }
+    
+  while ((j >= 0) && (c[j] >= n - k + j))
+    j--;
 
-    while (j >= 0) and (c[j] >= n - k + j):
-        j -= 1
+  if (j < 0) return 0;
 
-    if j < 0:
-        return False
+  c[j]++;
 
-    c[j] += 1
+  for (j += 1; j < k; j++)
+    c[j] = c[j-1] + 1;
 
-    for j in range(j + 1, k):
-        c[j] = c[j-1] + 1
+  return 1;
+}
 
-    return True
+void printc(int * c)
+{
+  printf("{ %i %i %i %i %i }\n", c[0], c[1], c[2], c[3], c[4]);
+}
 
-
-if __name__ == "__main__":
-    c = [0, 1, 2]
-    print(c)
-    while comb(c, 5, 3):
-        print(c)
+int main(int argc, char ** argv) 
+{
+  int c[5] = { 0, 1, 2, 3, 4 };
+  //printc(c);
+  while (comb(c, 52, 5)) {
+    //printc(c);
+  }
+}
