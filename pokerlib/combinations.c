@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-int comb(int * c, int n, int k)
+int combinations(int * c, int n, int k)
 {
   int j = k - 1;
 
@@ -9,7 +9,7 @@ int comb(int * c, int n, int k)
     return 1;
   }
     
-  while ((j >= 0) && (c[j] >= n - k + j))
+  while (j >= 0 && c[j] == n - k + j) 
     j--;
 
   if (j < 0) return 0;
@@ -24,14 +24,13 @@ int comb(int * c, int n, int k)
 
 void printc(int * c)
 {
-  printf("{ %i %i %i %i %i }\n", c[0], c[1], c[2], c[3], c[4]);
+  printf("{ %i %i %i }\n", c[0], c[1], c[2]);
 }
 
 int main(int argc, char ** argv) 
 {
-  int c[5] = { 0, 1, 2, 3, 4 };
-  //printc(c);
-  while (comb(c, 52, 5)) {
-    //printc(c);
+  int c[3] = { 0, 1, 1 };
+  while (combinations(c, 5, 3)) {
+    printc(c);
   }
 }
