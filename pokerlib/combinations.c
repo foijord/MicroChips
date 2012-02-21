@@ -29,8 +29,24 @@ void printc(int * c)
 
 int main(int argc, char ** argv) 
 {
-  int c[3] = { 0, 1, 1 };
-  while (combinations(c, 5, 3)) {
-    printc(c);
+  int count = 0;
+  int c[5] = { 0, 1, 2, 3, 4 };
+
+  /* while (combinations(c, 52, 5)) { */
+  /*   count++; */
+  /* } */
+
+  for (int c1 = 0; c1 < 48; c1++) {
+    for (int c2 = c1 + 1; c2 < 49; c2++) {
+      for (int c3 = c2 + 1; c3 < 50; c3++) {
+	for (int c4 = c3 + 1; c4 < 51; c4++) {
+	  for (int c5 = c4 + 1; c5 < 52; c5++) {
+	    count++;
+	  }
+	}
+      }
+    }
   }
+
+  printf("count: %i\n", count);
 }
