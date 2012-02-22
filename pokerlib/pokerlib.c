@@ -1,26 +1,11 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
-#include <assert.h>
 
+#include "utils.h"
 #include "constants.h"
 #include "pokerlib.h"
 #include "combinations.h"
-
-void 
-read_array(const char * filename, int * array)
-{
-  int index = 0;
-  char line[64];
-
-  FILE * file = fopen(filename, "rt");
-  assert(file && "file not found!");
-
-  while (fgets(line, 64, file)) {
-    array[index++] = atoi(line);
-  }
-  fclose(file);
-}
 
 struct eval7 {
   int * deck;
@@ -37,9 +22,9 @@ eval7_init(eval7_t * self)
   self->flushes = (int*) malloc(size_7_card_flushes);
   self->flush_check = (int*) malloc(size_7_card_flush_check);
 
-  read_array("../data/ranks_7.dat", self->ranks);
-  read_array("../data/flushes_7.dat", self->flushes);
-  read_array("../data/flushcheck_7.dat", self->flush_check);
+  utils_read_array("../data/ranks_7.dat", self->ranks);
+  utils_read_array("../data/flushes_7.dat", self->flushes);
+  utils_read_array("../data/flushcheck_7.dat", self->flush_check);
 
   self->deck = (int *)malloc(size_52_card_deck);
 
