@@ -37,9 +37,9 @@ eval7_init(eval7_t * self)
   self->flushes = (int*) malloc(size_7_card_flushes);
   self->flush_check = (int*) malloc(size_7_card_flush_check);
 
-  read_array("ranks_7.dat", self->ranks);
-  read_array("flushes_7.dat", self->flushes);
-  read_array("flushcheck_7.dat", self->flush_check);
+  read_array("../data/ranks_7.dat", self->ranks);
+  read_array("../data/flushes_7.dat", self->flushes);
+  read_array("../data/flushcheck_7.dat", self->flush_check);
 
   self->deck = (int *)malloc(size_52_card_deck);
 
