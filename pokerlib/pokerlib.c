@@ -1,82 +1,120 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <time.h>
+#include <assert.h>
+#include "constants.h"
+#include "pokerlib.h"
 
-static int * deck_keys;
-static int * ranks;
-static int * flushes;
-static int * flush_check;
+int *
+first_combination(int k)
+{
+  int i;
+  int * combination = (int *)malloc(k * sizeof(int));
+  for (i = 0; i < k-1; i++) { combination[i] = i; }
+  combination[k-1] = combination[k-2];
+  return combination;
+}
 
-static int rank_keys5[13] = { 79415, 43258, 19998, 12522, 5624, 2422, 992, 312, 94, 22, 5, 1, 0 };
-static int rank_keys6[13] = { 436437, 206930, 90838, 37951, 14270, 5760, 1734, 422, 98, 22, 5, 1, 0 };
-static int rank_keys7[13] = { 1479181, 636345, 262349, 83661, 22854, 8698, 2031, 453, 98, 22, 5, 1, 0 };
-
-static int flush_keys[13] = { 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1 };
-
-static int suit_keys6[4] = { 43, 7, 1, 0 };
-static int suit_keys7[4] = { 57, 8, 1, 0 };
-
-static int max_5_card_rank_key = 4 * 79415 + 3 * 43258;
-static int max_6_card_rank_key = 4 * 436437 + 3 * 206930;
-static int max_7_card_rank_key = 4 * 1479181 + 3 * 636345;
-
-static int max_5_card_flush_key = 4096 + 2048 + 1024 + 512 + 256;
-static int max_6_card_flush_key = 4096 + 2048 + 1024 + 512 + 256 + 128;
-static int max_7_card_flush_key = 4096 + 2048 + 1024 + 512 + 256 + 128 + 64;
-
-static int flush_bit_shift = 9;
-static int flush_bit_mask = 511;
+int
+next_combination(int * c, const int n, const int k)
+{
+  int j = k - 1;
+  if (c[j] < n - 1) {
+    c[j] += 1;
+    return 1;
+  }
+  while (j >= 0 && c[j] == n - k + j)
+    j--;
+  if (j < 0)
+    return 0;
+  c[j]++;
+  for (j += 1; j < k; j++)
+    c[j] = c[j-1] + 1;
+  return 1;
+}
 
 void 
 read_array(const char * filename, int * array)
 {
-  FILE * file;
-  char line [100];
-
-  file = fopen(filename, "rt");
-  if (file == NULL) { 
-    perror ("Error opening file");
-    return;
-  }
-
   int index = 0;
-  while (fgets(line , 100 , file) != NULL) {
-    int rank = atoi(line);
-    array[index++] = rank;
+  char line[64];
+
+  FILE * file = fopen(filename, "rt");
+  assert(file && "file not found!");
+
+  while (fgets(line, 64, file)) {
+    array[index++] = atoi(line);
   }
   fclose(file);
 }
 
-void init_seven_eval()
+struct eval7 {
+  int * deck;
+  int * ranks;
+  int * flushes;
+  int * flush_check;
+} eval7;
+
+void
+eval7_init(eval7_t * self)
 {
-  ranks = (int*)malloc((max_7_card_rank_key + 1) * sizeof(int));
-  flushes = (int*)malloc((max_7_card_flush_key + 1) * sizeof(int));
-  flush_check = (int*)malloc((max_7_card_flush_key + 1) * sizeof(int));
-  deck_keys = (int*)malloc(52 * sizeof(int));
-
-  read_array("ranks_7.dat", ranks);
-  read_array("flushes_7.dat", flushes);
-  read_array("flushcheck_7.dat", flush_check);
-
   int i;
-  for (i = 0; i < 52; i++) { deck_keys[i] = (rank_keys7[i >> 2] << flush_bit_shift) + suit_keys7[i & 3]; }
+  self->ranks = (int*) malloc(size_7_card_ranks);
+  self->flushes = (int*) malloc(size_7_card_flushes);
+  self->flush_check = (int*) malloc(size_7_card_flush_check);
+
+  read_array("ranks_7.dat", self->ranks);
+  read_array("flushes_7.dat", self->flushes);
+  read_array("flushcheck_7.dat", self->flush_check);
+
+  self->deck = (int *)malloc(size_52_card_deck);
+
+  for (i = 0; i < 52; i++) {
+    self->deck[i] = (rank_keys7[i >> 2] << flush_bit_shift) + suit_keys7[i & 3];
+  }
+}
+
+void
+eval7_exit(void)
+{
+  eval7_t * self = eval7_get();
+  free(self->deck);
+  free(self->ranks);
+  free(self->flushes);
+  free(self->flush_check);
+}
+
+eval7_t *
+eval7_get(void)
+{
+  static eval7_t * self = NULL;
+  if (!self) {
+    self = (eval7_t *)malloc(sizeof(eval7));
+    eval7_init(self);
+  }
+  return self;
+}
+
+int
+eval7_deal_card(eval7_t * self, const char * card)
+{
+  return 0;
 }
 
 int 
-get_rank_of_seven(int c1, int c2, int c3, int c4, int c5, int c6, int c7)
+eval7_get_rank(eval7_t * self, int c1, int c2, int c3, int c4, int c5, int c6, int c7)
 {
-  unsigned int key = deck_keys[c1] + 
-    deck_keys[c2] + 
-    deck_keys[c3] +
-    deck_keys[c4] +
-    deck_keys[c5] +
-    deck_keys[c6] +
-    deck_keys[c7];
+  unsigned int key = self->deck[c1] +
+                     self->deck[c2] +
+                     self->deck[c3] +
+                     self->deck[c4] +
+                     self->deck[c5] +
+                     self->deck[c6] +
+                     self->deck[c7];
 
-  int flush_suit = flush_check[key & flush_bit_mask];
+  int flush_suit = self->flush_check[key & flush_bit_mask];
       
   if (flush_suit < 0) {
-    return ranks[key >> flush_bit_shift];
+    return self->ranks[key >> flush_bit_shift];
   }
 
   key = 0;
@@ -88,74 +126,60 @@ get_rank_of_seven(int c1, int c2, int c3, int c4, int c5, int c6, int c7)
   if (suit_keys7[c6 & 3] == flush_suit) key += flush_keys[c6 >> 2];
   if (suit_keys7[c7 & 3] == flush_suit) key += flush_keys[c7 >> 2];
 
-  return flushes[key];
+  return self->flushes[key];
+}
+
+void
+calculate_pre_flop_equity()
+{
+  int rank1, rank2;
+  int wins1 = 0;
+  int wins2 = 0;
+  int draws = 0;
+  int count = 0;
+  
+  eval7_t * e7 = eval7_get();
+
+  int As = eval7_deal_card(e7, "As");
+  int Ah = eval7_deal_card(e7, "Ah");
+
+  int Ks = eval7_deal_card(e7, "Ks");
+  int Kh = eval7_deal_card(e7, "Kh");
+
+  int * c = first_combination(5);
+  while (next_combination(c, 48, 5)) {
+    rank1 = eval7_get_rank(e7, As, Ah, c[0], c[1], c[2], c[3], c[4]);
+    rank2 = eval7_get_rank(e7, Ks, Kh, c[0], c[1], c[2], c[3], c[4]);
+    if (rank1 > rank2) wins1++;
+    if (rank1 < rank2) wins2++;
+    if (rank1 == rank2) draws++;
+  }
+
+  printf("wins0: %i, wins2: %i, draws: %i\n", wins1, wins2, draws);
 }
 
 int 
 main(int argc, char ** argv) 
 {
-  init_seven_eval();
-
-  // int * rank_counts = (int*)malloc(7462 * sizeof(int));
-  // int i;
-  // for (i = 0; i < 7462; i++) {
-  //   rank_counts[i] = 0;
-  // }
-
-  clock_t tic = clock();
-
   int count = 0;
-  int c1, c2, c3, c4, c5, c6, c7;
+  // make sure rank computation is not optimized away by making it volatile
   volatile int rank;
+  clock_t tic, tac;
 
-  unsigned int key1, key2, key3, key4, key5, key6, key;
+  eval7_t * e7 = eval7_get();
+  int * c = first_combination(7);
 
-  for (c1 = 0; c1 < 46; c1++) {
-    key1 = deck_keys[c1];
-    for (c2 = c1 + 1; c2 < 47; c2++) {
-      key2 = key1 + deck_keys[c2];
-      for (c3 = c2 + 1; c3 < 48; c3++) {
-        key3 = key2 + deck_keys[c3];
-        for (c4 = c3 + 1; c4 < 49; c4++) {
-          key4 = key3 + deck_keys[c4];
-          for (c5 = c4 + 1; c5 < 50; c5++) {
-            key5 = key4 + deck_keys[c5];
-            for (c6 = c5 + 1; c6 < 51; c6++) {
-              key6 = key5 + deck_keys[c6];
-              for (c7 = c6 + 1; c7 < 52; c7++) {
-                key = key6 + deck_keys[c7];
+  tic = clock();
 
-                int flush_suit = flush_check[key & flush_bit_mask];
-      
-                if (flush_suit < 0) {
-                  rank = ranks[key >> flush_bit_shift];
-                }
-                else {
-                  key = 0;
-                  if (suit_keys7[c1 & 3] == flush_suit) key += flush_keys[c1 >> 2];
-                  if (suit_keys7[c2 & 3] == flush_suit) key += flush_keys[c2 >> 2];
-                  if (suit_keys7[c3 & 3] == flush_suit) key += flush_keys[c3 >> 2];
-                  if (suit_keys7[c4 & 3] == flush_suit) key += flush_keys[c4 >> 2];
-                  if (suit_keys7[c5 & 3] == flush_suit) key += flush_keys[c5 >> 2];
-                  if (suit_keys7[c6 & 3] == flush_suit) key += flush_keys[c6 >> 2];
-                  if (suit_keys7[c7 & 3] == flush_suit) key += flush_keys[c7 >> 2];
-                  rank = flushes[key];
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+  while (next_combination(c, 52, 7)) {
+    rank = eval7_get_rank(e7, c[0], c[1], c[2], c[3], c[4], c[5], c[6]);
+    count++;
   }
+  
+  tac = clock();
+  printf("Ranked %i 7-card poker hands in %f seconds\n", count, (double)(tac - tic) / CLOCKS_PER_SEC);
 
-  clock_t tac = clock();
-  //printf("rank: %i\n", rank);
-  printf("Poker hands: %i Elapsed: %f seconds\n", count, (double)(tac - tic) / CLOCKS_PER_SEC);
-
-  // for (i = 7461; i > 7450; i--) {
-  //   printf("%i\n", rank_counts[i]);
-  // }
-
+  eval7_exit();
+  
   return 1;
 }
