@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "utils.h"
 #include "constants.h"
@@ -118,8 +119,49 @@ calculate_pre_flop_equity()
   printf("wins0: %i, wins2: %i, draws: %i\n", wins1, wins2, draws);
 }
 
-int 
-main(int argc, char ** argv) 
+void
+test_deck()
+{
+  // assemble a deck of card symbols
+  int i;
+  int max_card_index = 51;
+
+  char ** deck = (char**)malloc(52 * sizeof(char*));
+  for (i = 0; i < 52; i++) {
+    deck[i] = (char*) malloc(2);
+    sprintf(deck[i], "%s%s", rank_symbols[i >> 2], suit_symbols[i & 3]);
+  }
+
+  // deal As
+  for (i = 0; i < max_card_index; i++) {
+    if (strcmp(deck[i], "As") == 0) {
+      // swap
+      char * tmp = deck[max_card_index];
+      deck[max_card_index] = deck[i];
+      deck[i] = tmp;
+      max_card_index--;
+      break;
+    }
+  }
+  // deal Jc
+  for (i = 0; i < max_card_index; i++) {
+    if (strcmp(deck[i], "Jc") == 0) {
+      // swap
+      char * tmp = deck[max_card_index];
+      deck[max_card_index] = deck[i];
+      deck[i] = tmp;
+      max_card_index--;
+      break;
+    }
+  }
+
+  for (i = 0; i < 52; i++) {
+    printf("deck[%i]: %s\n", i, deck[i]);
+  }
+}
+
+void 
+compute_all_7_card_hands()
 {
   int count = 0;
   // make sure rank computation is not optimized away by making it volatile
@@ -140,6 +182,11 @@ main(int argc, char ** argv)
   printf("Ranked %i 7-card poker hands in %f seconds\n", count, (double)(tac - tic) / CLOCKS_PER_SEC);
 
   eval7_exit();
-  
+}
+
+int 
+main(int argc, char ** argv) 
+{
+  test_deck();  
   return 1;
 }

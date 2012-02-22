@@ -2,7 +2,7 @@
 CC = gcc
 LD = gcc
 
-CFLAGS = -O3
+CFLAGS = -g
 
 .SUFFIXES: .c .h .o
 

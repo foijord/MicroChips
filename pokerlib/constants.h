@@ -2,6 +2,9 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
+const char * rank_symbols[13] = { "A", "K", "Q", "J", "T", "9", "8", "7", "6", "5", "4", "3", "2" };
+const char * suit_symbols[4] = { "s", "h", "c", "d" };
+
 const int rank_keys5[13] = { 79415, 43258, 19998, 12522, 5624, 2422, 992, 312, 94, 22, 5, 1, 0 };
 const int rank_keys6[13] = { 436437, 206930, 90838, 37951, 14270, 5760, 1734, 422, 98, 22, 5, 1, 0 };
 const int rank_keys7[13] = { 1479181, 636345, 262349, 83661, 22854, 8698, 2031, 453, 98, 22, 5, 1, 0 };
