@@ -1,0 +1,4 @@
+
+- compact rank/flush tables, write only index and keys
+- command-loop Python program for equity calculations
+- port evaluator code to C
