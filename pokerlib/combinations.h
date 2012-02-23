@@ -6,7 +6,6 @@
 extern "C" {
 #endif
 
-int * first_combination(int k);
 int next_combination(int * c, const int n, const int k);
 
 #ifdef __cplusplus

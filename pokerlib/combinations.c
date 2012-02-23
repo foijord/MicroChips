@@ -2,16 +2,6 @@
 
 #include <stdlib.h>
 
-int *
-first_combination(int k)
-{
-  int i;
-  int * combination = (int *)malloc(k * sizeof(int));
-  for (i = 0; i < k-1; i++) { combination[i] = i; }
-  combination[k-1] = combination[k-2];
-  return combination;
-}
-
 int
 next_combination(int * c, const int n, const int k)
 {

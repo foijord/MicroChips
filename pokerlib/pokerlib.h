@@ -6,12 +6,9 @@
 extern "C" {
 #endif
 
-typedef struct eval7 eval7_t;
-
-eval7_t * eval7_get(void);
-void eval7_exit(void);
-int eval7_deal_card(eval7_t * self, const char * card);
-int eval7_get_rank(eval7_t * self, int c1, int c2, int c3, int c4, int c5, int c6, int c7);
+void compute_pre_flop_equity_vs_random(int c0, int c1, int counts[3]);
+void compute_pre_flop_equity_vs_1_hand(int c0, int c1, int c2, int c3, int counts[3]);
+void rank_all_7_card_hands(void);
 
 #ifdef __cplusplus
 }
