@@ -13,7 +13,6 @@ struct eval7 {
   int * ranks;
   int * flushes;
   int * flush_check;
-  int last_deck_index;
 } eval7;
 
 void
@@ -28,17 +27,10 @@ eval7_init(eval7_t * self)
   utils_read_array("../data/flushcheck_7.dat", self->flush_check);
 
   self->deck = (int *)malloc(size_52_card_deck);
-  eval7_reset_deck(self);
-}
-
-void
-eval7_reset_deck(eval7_t * self)
-{
   int i;
   for (i = 0; i < 52; i++) {
     self->deck[i] = (rank_keys7[i >> 2] << flush_bit_shift) + suit_keys7[i & 3];
   }
-  self->last_deck_index = 51;
 }
 
 void
@@ -60,20 +52,6 @@ eval7_get(void)
     eval7_init(self);
   }
   return self;
-}
-
-int
-eval7_deal_card(eval7_t * self, int card)
-{
-  // swap card with last valid deck index
-  int index = self->last_deck_index;
-  int tmp = self->deck[card];
-  self->deck[card] = self->deck[self->last_deck_index];
-  self->deck[self->last_deck_index] = tmp;
-  self->last_deck_index--;
-
-  // new index for card that was dealt
-  return index;
 }
 
 int 
