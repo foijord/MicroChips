@@ -33,7 +33,7 @@ deal(int * deck, int card)
 void
 compute_pre_flop_equity_vs_1_hand(int c0, int c1, int c2, int c3, int counts[3])
 {
-  int rank1, rank2, i;
+  int rank1, rank2;
 
   eval7_t * e7 = eval7_get();
   int c[5] = { 0, 1, 2, 3, 3 };
@@ -75,18 +75,6 @@ rank_all_7_card_hands(void)
   printf("Ranked %i poker hands.\n", count);
 }
 
-void
-eval7_test(void)
-{
-  int rank;
-  eval7_t * e7 = eval7_get();
-  eval7_deal_card(e7, 49);
-  eval7_deal_card(e7, 1);
-  eval7_deal_card(e7, 3);
-  rank = eval7_get_rank(e7, 0, 4, 8, 12, 16, 50, 51);
-  printf("rank: %i\n", rank);
-}
-
 int 
 main(int argc, char ** argv) 
 {
@@ -99,8 +87,8 @@ main(int argc, char ** argv)
   (void)eval7_get(); // initialize here, so we don't time table loading
   
   tic = clock();
-  //compute_pre_flop_equity_vs_1_hand(0, 1, 4, 5, counts);
-  compute_pre_flop_equity_vs_random(1, 0, counts);
+  compute_pre_flop_equity_vs_1_hand(0, 1, 4, 5, counts);
+  //compute_pre_flop_equity_vs_random(1, 0, counts);
   //rank_all_7_card_hands();
   tac = clock();
   
