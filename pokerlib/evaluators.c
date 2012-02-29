@@ -13,6 +13,7 @@ struct eval7 {
   int * ranks;
   int * flushes;
   int * flush_check;
+  unsigned int key;
 } eval7;
 
 void
@@ -26,6 +27,7 @@ eval7_init(eval7_t * self)
   utils_read_array("../data/flushes_7.dat", self->flushes);
   utils_read_array("../data/flushcheck_7.dat", self->flush_check);
 
+  self->key = 0;
   self->deck = (int *)malloc(size_52_card_deck);
   int i;
   for (i = 0; i < 52; i++) {
@@ -80,7 +82,29 @@ eval7_get_rank(eval7_t * self, int c1, int c2, int c3, int c4, int c5, int c6, i
   if (suit_keys7[c6 & 3] == flush_suit) key += flush_keys[c6 >> 2];
   if (suit_keys7[c7 & 3] == flush_suit) key += flush_keys[c7 >> 2];
 
-  // assert here that flushes[key] != 0 ?
+  return self->flushes[key];
+}
+
+void
+eval_7_update_board(eval7_t * self, int c1, int c2, int c3, int c4, int c5)
+{
+  self->key = self->deck[c1] + self->deck[c2] + self->deck[c3] + self->deck[c4] + self->deck[c5];
+}
+
+int
+eval7_get_rank_with_board(eval7_t * self, int c1, int c2)
+{
+  unsigned int key = self->key + self->deck[c1] + self->deck[c2];
+  int flush_suit = self->flush_check[key & flush_bit_mask];
+      
+  if (flush_suit < 0) {
+    return self->ranks[key >> flush_bit_shift];
+  }
+
+  key = self->key;
+  if (suit_keys7[c1 & 3] == flush_suit) key += flush_keys[c1 >> 2];
+  if (suit_keys7[c2 & 3] == flush_suit) key += flush_keys[c2 >> 2];
+
   return self->flushes[key];
 }
 
