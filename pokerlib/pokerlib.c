@@ -23,7 +23,6 @@ void
 deal(int * deck, int card)
 {
   // swap card with last valid deck index
-  int index = last_deck_index;
   int tmp = deck[card];
   deck[card] = deck[last_deck_index];
   deck[last_deck_index] = tmp;
@@ -50,10 +49,6 @@ compute_pre_flop_equity_vs_1_hand(int c0, int c1, int c2, int c3, int counts[3])
   deal(deck, c3);
 
   while (next_combination(c, 48, 5)) {
-    /* eval7_update_board(e7, deck[c[0]], deck[c[1]], deck[c[2]], deck[c[3]], deck[c[4]]); */
-    /* rank1 = eval7_get_rank_with_board(e7, c0, c1); */
-    /* rank2 = eval7_get_rank_with_board(e7, c2, c3); */
-    
     rank1 = eval7_get_rank(e7, c0, c1, deck[c[0]], deck[c[1]], deck[c[2]], deck[c[3]], deck[c[4]]);
     rank2 = eval7_get_rank(e7, c2, c3, deck[c[0]], deck[c[1]], deck[c[2]], deck[c[3]], deck[c[4]]);
     if (rank1 > rank2) counts[0]++;

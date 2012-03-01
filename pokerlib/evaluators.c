@@ -85,26 +85,18 @@ eval7_get_rank(eval7_t * self, int c1, int c2, int c3, int c4, int c5, int c6, i
   return self->flushes[key];
 }
 
-void
-eval_7_update_board(eval7_t * self, int c1, int c2, int c3, int c4, int c5)
-{
-  self->key = self->deck[c1] + self->deck[c2] + self->deck[c3] + self->deck[c4] + self->deck[c5];
-}
-
 int
-eval7_get_rank_with_board(eval7_t * self, int c1, int c2)
+eval7_get_flush_rank(eval7_t * self, int flush_suit)
 {
-  unsigned int key = self->key + self->deck[c1] + self->deck[c2];
-  int flush_suit = self->flush_check[key & flush_bit_mask];
-      
-  if (flush_suit < 0) {
-    return self->ranks[key >> flush_bit_shift];
-  }
+  unsigned int key = 0;
 
-  key = self->key;
   if (suit_keys7[c1 & 3] == flush_suit) key += flush_keys[c1 >> 2];
   if (suit_keys7[c2 & 3] == flush_suit) key += flush_keys[c2 >> 2];
+  if (suit_keys7[c3 & 3] == flush_suit) key += flush_keys[c3 >> 2];
+  if (suit_keys7[c4 & 3] == flush_suit) key += flush_keys[c4 >> 2];
+  if (suit_keys7[c5 & 3] == flush_suit) key += flush_keys[c5 >> 2];
+  if (suit_keys7[c6 & 3] == flush_suit) key += flush_keys[c6 >> 2];
+  if (suit_keys7[c7 & 3] == flush_suit) key += flush_keys[c7 >> 2];
 
   return self->flushes[key];
 }
-
