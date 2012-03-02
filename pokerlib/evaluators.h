@@ -11,7 +11,7 @@ typedef struct eval7 eval7_t;
 eval7_t * eval7_get(void);
 void eval7_exit(void);
 int eval7_get_rank(eval7_t * self, int c1, int c2, int c3, int c4, int c5, int c6, int c7);
-int eval7_get_flush_rank(eval7_t * self, int flush_suit);
+
 #ifdef __cplusplus
 }
 #endif
