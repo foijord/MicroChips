@@ -3,18 +3,25 @@
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "evaluators.h"
 #include "combinations.h"
 
 void
-init_deck(int deck[52], int * c, int n)
+init_deck(int deck[52], int c[], int n)
 {
-	int i;
-	int last_deck_index = 51;
-	for (i = 0; i < 52; i++) { deck[i] = i;	}
-	for (i = 0; i < n; i++) {
-		if (c[i] < 52 - n) deck[c[i]] = last_deck_index--;
+	int ok = 0;
+	int i, j, k = 0;
+
+	for (i = 0; i < 52; i++) {
+		do {
+			ok = 1;
+			for (j = 0; j < n; j++) {
+				if (c[j] == k) { ok = 0; k++; }
+			}
+		} while (!ok);
+		deck[i] = k++;
 	}
 }
 
@@ -80,8 +87,8 @@ main(int argc, char ** argv)
   (void)eval7_get(); // initialize here, so we don't time table loading
   
   tic = clock();
-  // compute_pre_flop_equity_vs_1_hand(20, 30, 50, 51, counts);
-  compute_pre_flop_equity_vs_random(1, 0, counts);
+  //compute_pre_flop_equity_vs_1_hand(20, 30, 50, 51, counts);
+  compute_pre_flop_equity_vs_random(3, 0, counts);
   //rank_all_7_card_hands();
   tac = clock();
   
