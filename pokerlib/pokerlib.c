@@ -3,55 +3,52 @@
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
 
 #include "evaluators.h"
 #include "combinations.h"
 
 void
-init_deck(int deck[52], int c[], int n)
+init_deck(int deck[], int c[], int n)
 {
-	int ok = 0;
-	int i, j, k = 0;
-
-	for (i = 0; i < 52; i++) {
-		do {
-			ok = 1;
-			for (j = 0; j < n; j++) {
-				if (c[j] == k) { ok = 0; k++; }
-			}
-		} while (!ok);
-		deck[i] = k++;
-	}
-}
-
-void
-compute_pre_flop_equity_vs_random(int c0, int c1, int counts[3])
-{
-  int c[2] = { 0, 0 };
-	int deck[52];
-	int hand[2] = { c0, c1 };
-	init_deck(deck, hand, 2);
-
-  while (next_combination(c, 50, 2)) {
-    compute_pre_flop_equity_vs_1_hand(c0, c1, deck[c[0]], deck[c[1]], counts);
+  int ok, i, j, k = 0;
+  
+  for (i = 0; i < 52 - n; i++) {
+    do {
+      ok = 1;
+      for (j = 0; j < n; j++) {
+	if (c[j] == k) { ok = 0; k++; }
+      }
+    } while (!ok);
+    deck[i] = k++;
   }
 }
 
 void
-compute_pre_flop_equity_vs_1_hand(int c0, int c1, int c2, int c3, int counts[3])
+compute_pre_flop_equity_vs_random(int cards[2], int counts[3])
+{
+  int c[2] = { 0, 0 };
+  int deck[50];
+  init_deck(deck, cards, 2);
+  
+  while (next_combination(c, 50, 2)) {
+    int hand[4] = { cards[0], cards[1], deck[c[0]], deck[c[1]] };
+    compute_pre_flop_equity_vs_1_hand(hand, counts);
+  }
+}
+
+void
+compute_pre_flop_equity_vs_1_hand(int cards[4], int counts[3])
 {
   int rank1, rank2;
   eval7_t * e7 = eval7_get();
   int c[5] = { 0, 1, 2, 3, 3 };
-
-	int deck[52];
-	int hand[4] = { c0, c1, c2, c3 };
-	init_deck(deck, hand, 4);
-	
+  
+  int deck[48];
+  init_deck(deck, cards, 4);
+  
   while (next_combination(c, 48, 5)) {
-    rank1 = eval7_get_rank(e7, c0, c1, deck[c[0]], deck[c[1]], deck[c[2]], deck[c[3]], deck[c[4]]);
-    rank2 = eval7_get_rank(e7, c2, c3, deck[c[0]], deck[c[1]], deck[c[2]], deck[c[3]], deck[c[4]]);
+    rank1 = eval7_get_rank(e7, cards[0], cards[1], deck[c[0]], deck[c[1]], deck[c[2]], deck[c[3]], deck[c[4]]);
+    rank2 = eval7_get_rank(e7, cards[2], cards[3], deck[c[0]], deck[c[1]], deck[c[2]], deck[c[3]], deck[c[4]]);
     if (rank1 > rank2) counts[0]++;
     if (rank1 < rank2) counts[1]++;
     if (rank1 == rank2) counts[2]++;
@@ -85,11 +82,10 @@ main(int argc, char ** argv)
   float p0, p1, p2;
   
   (void)eval7_get(); // initialize here, so we don't time table loading
-  
+
+  int hand[2] = { 0, 1 };  
   tic = clock();
-  //compute_pre_flop_equity_vs_1_hand(20, 30, 50, 51, counts);
-  compute_pre_flop_equity_vs_random(3, 0, counts);
-  //rank_all_7_card_hands();
+  compute_pre_flop_equity_vs_random(hand, counts);
   tac = clock();
   
   sum = counts[0] + counts[1] + counts[2];

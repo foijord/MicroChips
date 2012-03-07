@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 int
-next_combination(int * c, const int n, const int k)
+next_combination(int c[], const int n, const int k)
 {
   int j = k - 1;
   if (c[j] < n - 1) {
