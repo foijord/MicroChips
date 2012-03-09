@@ -55,17 +55,17 @@ eval7_get(void)
 
 static int get_flush_rank(eval7_t * self, int c1, int c2, int c3, int c4, int c5, int c6, int c7, int flush_suit)
 {
-	unsigned int key = 0;
+  unsigned int key = 0;
 
-	if (suit_keys7[c1 & 3] == flush_suit) key += flush_keys[c1 >> 2];
-	if (suit_keys7[c2 & 3] == flush_suit) key += flush_keys[c2 >> 2];
-	if (suit_keys7[c3 & 3] == flush_suit) key += flush_keys[c3 >> 2];
-	if (suit_keys7[c4 & 3] == flush_suit) key += flush_keys[c4 >> 2];
-	if (suit_keys7[c5 & 3] == flush_suit) key += flush_keys[c5 >> 2];
-	if (suit_keys7[c6 & 3] == flush_suit) key += flush_keys[c6 >> 2];
-	if (suit_keys7[c7 & 3] == flush_suit) key += flush_keys[c7 >> 2];
+  if (suit_keys7[c1 & 3] == flush_suit) key += flush_keys[c1 >> 2];
+  if (suit_keys7[c2 & 3] == flush_suit) key += flush_keys[c2 >> 2];
+  if (suit_keys7[c3 & 3] == flush_suit) key += flush_keys[c3 >> 2];
+  if (suit_keys7[c4 & 3] == flush_suit) key += flush_keys[c4 >> 2];
+  if (suit_keys7[c5 & 3] == flush_suit) key += flush_keys[c5 >> 2];
+  if (suit_keys7[c6 & 3] == flush_suit) key += flush_keys[c6 >> 2];
+  if (suit_keys7[c7 & 3] == flush_suit) key += flush_keys[c7 >> 2];
 
-	return self->flushes[key];	
+  return self->flushes[key];	
 }
 
 int 
@@ -98,10 +98,10 @@ eval7_rank_hands(eval7_t * self, int h1, int h2, int h3, int h4, int b1, int b2,
   int flush_suit1 = self->flush_check[key1 & flush_bit_mask];
   int flush_suit2 = self->flush_check[key2 & flush_bit_mask];
 
-	int rank1 = (flush_suit1 < 0) ? self->ranks[key1 >> flush_bit_shift] : get_flush_rank(self, h1, h2, b1, b2, b3, b4, b5, flush_suit1);
-	int rank2 = (flush_suit2 < 0) ? self->ranks[key2 >> flush_bit_shift] : get_flush_rank(self, h3, h4, b1, b2, b3, b4, b5, flush_suit2);
+  int rank1 = (flush_suit1 < 0) ? self->ranks[key1 >> flush_bit_shift] : get_flush_rank(self, h1, h2, b1, b2, b3, b4, b5, flush_suit1);
+  int rank2 = (flush_suit2 < 0) ? self->ranks[key2 >> flush_bit_shift] : get_flush_rank(self, h3, h4, b1, b2, b3, b4, b5, flush_suit2);
 
-	if (rank1 > rank2) counts[0]++;
-	if (rank1 < rank2) counts[1]++;
-	if (rank1 == rank2) counts[2]++;
+  if (rank1 > rank2) counts[0]++;
+  if (rank1 < rank2) counts[1]++;
+  if (rank1 == rank2) counts[2]++;
 }

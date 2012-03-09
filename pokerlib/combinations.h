@@ -13,4 +13,5 @@ int deal_next(int deck[48], int board[5]);
 }
 #endif
 
+
 #endif // COMBINATIONS_H

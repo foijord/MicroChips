@@ -18,9 +18,10 @@ all: $(PROGRAMS)
 clean:
 	rm -f $(PROGRAMS) *.o
 
-pokerlib: pokerlib.o combinations.o evaluators.o utils.o
+pokerlib: pokerlib.o combinations.o evaluators.o utils.o deck.o
 	$(CC) -o $@ $^
 
+deck.o: deck.c deck.h $(DEPS)
 utils.o: utils.c utils.h $(DEPS)
 pokerlib.o: pokerlib.c pokerlib.h $(DEPS)
 evaluators.o: evaluators.c evaluators.h $(DEPS)
