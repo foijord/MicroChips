@@ -16,7 +16,7 @@ init_deck(int deck[], int c[], int n)
     do {
       ok = 1;
       for (j = 0; j < n; j++) {
-	if (c[j] == k) { ok = 0; k++; }
+				if (c[j] == k) { ok = 0; k++; }
       }
     } while (!ok);
     deck[i] = k++;
@@ -46,12 +46,8 @@ compute_pre_flop_equity_vs_1_hand(int cards[4], int counts[3])
   int deck[48];
   init_deck(deck, cards, 4);
   
-  while (next_combination(c, 48, 5)) {
-    rank1 = eval7_get_rank(e7, cards[0], cards[1], deck[c[0]], deck[c[1]], deck[c[2]], deck[c[3]], deck[c[4]]);
-    rank2 = eval7_get_rank(e7, cards[2], cards[3], deck[c[0]], deck[c[1]], deck[c[2]], deck[c[3]], deck[c[4]]);
-    if (rank1 > rank2) counts[0]++;
-    if (rank1 < rank2) counts[1]++;
-    if (rank1 == rank2) counts[2]++;
+  while (deal_next(deck, c)) {
+		eval7_rank_hands(e7, cards[0], cards[1], cards[2], cards[3], deck[c[0]], deck[c[1]], deck[c[2]], deck[c[3]], deck[c[4]], counts);
   }
 }
 
@@ -80,13 +76,14 @@ main(int argc, char ** argv)
   int counts[3] = { 0, 0, 0 };
   int sum;
   float p0, p1, p2;
+  int hand[2] = { 0, 1 };
   
   (void)eval7_get(); // initialize here, so we don't time table loading
 
-  int hand[2] = { 0, 1 };  
   tic = clock();
   compute_pre_flop_equity_vs_random(hand, counts);
-  tac = clock();
+	//compute_pre_flop_equity_vs_1_hand(hand, counts);
+	tac = clock();
   
   sum = counts[0] + counts[1] + counts[2];
   p0 = (float) counts[0] / sum;

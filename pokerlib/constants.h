@@ -2,6 +2,8 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
+#include <stddef.h>
+
 const char * rank_symbols[13] = { "A", "K", "Q", "J", "T", "9", "8", "7", "6", "5", "4", "3", "2" };
 const char * suit_symbols[4] = { "s", "h", "c", "d" };
 
@@ -14,18 +16,18 @@ const int flush_keys[13] = { 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 
 const int suit_keys6[4] = { 43, 7, 1, 0 };
 const int suit_keys7[4] = { 57, 8, 1, 0 };
 
-const int size_5_card_ranks = (4 * 79415 + 3 * 43258 + 1) * sizeof(int);
-const int size_6_card_ranks = (4 * 436437 + 3 * 206930 + 1) * sizeof(int);
-const int size_7_card_ranks = (4 * 1479181 + 3 * 636345 + 1) * sizeof(int);
+const size_t size_5_card_ranks = (4 * 79415 + 3 * 43258 + 1) * sizeof(int);
+const size_t size_6_card_ranks = (4 * 436437 + 3 * 206930 + 1) * sizeof(int);
+const size_t size_7_card_ranks = (4 * 1479181 + 3 * 636345 + 1) * sizeof(int);
 
-const int size_5_card_flushes = (4096 + 2048 + 1024 + 512 + 256 + 1) * sizeof(int);
-const int size_6_card_flushes = (4096 + 2048 + 1024 + 512 + 256 + 128 + 1) * sizeof(int);
-const int size_7_card_flushes = (4096 + 2048 + 1024 + 512 + 256 + 128 + 64 + 1) * sizeof(int);
+const size_t size_5_card_flushes = (4096 + 2048 + 1024 + 512 + 256 + 1) * sizeof(int);
+const size_t size_6_card_flushes = (4096 + 2048 + 1024 + 512 + 256 + 128 + 1) * sizeof(int);
+const size_t size_7_card_flushes = (4096 + 2048 + 1024 + 512 + 256 + 128 + 64 + 1) * sizeof(int);
 
-const int size_6_card_flush_check = (6 * 43 + 1) * sizeof(int);
-const int size_7_card_flush_check = (7 * 57 + 1) * sizeof(int);
+const size_t size_6_card_flush_check = (6 * 43 + 1) * sizeof(int);
+const size_t size_7_card_flush_check = (7 * 57 + 1) * sizeof(int);
 
-const int size_52_card_deck = 52 * sizeof(int);
+const size_t size_52_card_deck = 52 * sizeof(int);
 
 const int flush_bit_shift = 9;
 const int flush_bit_mask = 511;

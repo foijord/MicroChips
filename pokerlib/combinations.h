@@ -7,6 +7,7 @@ extern "C" {
 #endif
 
 int next_combination(int * c, const int n, const int k);
+int deal_next(int deck[48], int board[5]);
 
 #ifdef __cplusplus
 }
