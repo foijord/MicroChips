@@ -5,10 +5,17 @@
 #include <stdio.h>
 
 void 
-deck_init(deck_t * self, int deal_count, int dead_cards[], int num_dead_cards)
+deck_init_cards(deck_t * self)
+{
+  int i;
+  self->deck_size = 52;
+  for (i = 0; i < self->deck_size; i++) self->cards[i] = i;
+}
+
+void 
+deck_init_with_dead_cards(deck_t * self, int dead_cards[], int num_dead_cards)
 {
   int ok, i, j, k = 0;
-  self->deal_count = deal_count;
   self->deck_size = 52 - num_dead_cards;
 
   for (i = 0; i < self->deck_size; i++) {
@@ -20,14 +27,19 @@ deck_init(deck_t * self, int deal_count, int dead_cards[], int num_dead_cards)
     } while (!ok);
     self->cards[i] = k++;
   }
-  for (i = 0; i < deal_count - 1; i++) {
-    self->board[i] = i;
-  }
+}
+
+void
+deck_init_deal(deck_t * self, const int deal_count)
+{
+  int i;
+  for (i = 0; i < deal_count - 1; i++) self->board[i] = i;
   self->board[deal_count - 1] = deal_count - 2;
+  self->deal_count = deal_count;
 }
 
 int
-deck_deal(deck_t * self)
+deck_deal_next(deck_t * self)
 {
   return next_combination(self->board, self->deck_size, self->deal_count);
 }

@@ -36,7 +36,6 @@ void
 eval7_exit(void)
 {
   eval7_t * self = eval7_get();
-  free(self->deck);
   free(self->ranks);
   free(self->flushes);
   free(self->flush_check);

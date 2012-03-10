@@ -11,9 +11,10 @@ void
 compute_pre_flop_equity_vs_random(int cards[2], int counts[3])
 {
   deck_t deck;
-  deck_init(&deck, 2, cards, 2);
+  deck_init_with_dead_cards(&deck, cards, 2);
+  deck_init_deal(&deck, 2);
 
-  while (deck_deal(&deck)) {
+  while (deck_deal_next(&deck)) {
     int hand[4] = { cards[0], cards[1], deck.cards[deck.board[0]], deck.cards[deck.board[1]] };
     compute_pre_flop_equity_vs_1_hand(hand, counts);
   }
@@ -23,10 +24,12 @@ void
 compute_pre_flop_equity_vs_1_hand(int cards[4], int counts[3])
 {
   eval7_t * e7 = eval7_get();
+
   deck_t deck;
-  deck_init(&deck, 5, cards, 4);
-  
-  while (deck_deal(&deck)) {
+  deck_init_with_dead_cards(&deck, cards, 4);
+  deck_init_deal(&deck, 5);
+
+  while (deck_deal_next(&deck)) {
     eval7_rank_hands(e7, cards[0], cards[1], cards[2], cards[3], 
                      deck.cards[deck.board[0]],
                      deck.cards[deck.board[1]],
@@ -40,14 +43,13 @@ compute_pre_flop_equity_vs_1_hand(int cards[4], int counts[3])
 void 
 rank_all_7_card_hands(void)
 {
-  int count = 0;
-  // make sure rank computation is not optimized away by making it volatile
-  volatile int rank;
+  volatile int rank, count = 0;
   eval7_t * e7 = eval7_get();
   deck_t deck;
-  deck_init(&deck, 7, 0, 0);
+  deck_init_cards(&deck);
+  deck_init_deal(&deck, 7);
 
-  while (deck_deal(&deck)) {
+  while (deck_deal_next(&deck)) {
     rank = eval7_get_rank(e7, 
                           deck.board[0],
                           deck.board[1],
@@ -69,14 +71,14 @@ main(int argc, char ** argv)
   int counts[3] = { 0, 0, 0 };
   int sum;
   float p0, p1, p2;
-  int hand[4] = { 0, 1, 4, 5 };
+  int hand[4] = { 4, 5, 6, 7 };
   
   (void)eval7_get(); // initialize here, so we don't time table loading
 
   tic = clock();
-  // rank_all_7_card_hands();
-  compute_pre_flop_equity_vs_random(hand, counts);
-  // compute_pre_flop_equity_vs_1_hand(hand, counts);
+  rank_all_7_card_hands();
+  /* compute_pre_flop_equity_vs_random(hand, counts); */
+  /* compute_pre_flop_equity_vs_1_hand(hand, counts); */
   tac = clock();
   
   sum = counts[0] + counts[1] + counts[2];
