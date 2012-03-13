@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
+from eval5 import *
 from itertools import *
 from constants import *
-from pokerlib import *
 
 def generate_5_card_ranks():
     ranks = [0] * (max_5_card_rank_key + 1)

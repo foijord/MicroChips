@@ -67,7 +67,7 @@ def print_pairs():
         for c in combinations(r, 3):
             print_class(card_ranks[i] * 2 + ''.join(list(c)), "Pair")
 
-def main():
+if __name__ == "__main__":
     init_straights()
     init_highcards()
 
@@ -80,6 +80,3 @@ def main():
     print_two_pair()
     print_pairs()
     print_high_cards(False)
-
-if __name__ == "__main__":
-    main()
