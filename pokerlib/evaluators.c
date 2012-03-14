@@ -23,9 +23,9 @@ eval7_init(eval7_t * self)
   self->flushes = (int*) malloc(size_7_card_flushes);
   self->flush_check = (int*) malloc(size_7_card_flush_check);
 
-  utils_read_array("../data/ranks_7.dat", self->ranks);
-  utils_read_array("../data/flushes_7.dat", self->flushes);
-  utils_read_array("../data/flushcheck_7.dat", self->flush_check);
+  utils_read_array("data/ranks_7.dat", self->ranks);
+  utils_read_array("data/flushes_7.dat", self->flushes);
+  utils_read_array("data/flushcheck_7.dat", self->flush_check);
 
   for (i = 0; i < 52; i++) {
     self->deck[i] = (rank_keys7[i >> 2] << flush_bit_shift) + suit_keys7[i & 3];

@@ -71,13 +71,13 @@ main(int argc, char ** argv)
   int counts[3] = { 0, 0, 0 };
   int sum;
   float p0, p1, p2;
-  int hand[4] = { 4, 5, 6, 7 };
+  int hand[4] = { 0, 1, 4, 5 };
   
   (void)eval7_get(); // initialize here, so we don't time table loading
 
   tic = clock();
-  rank_all_7_card_hands();
-  /* compute_pre_flop_equity_vs_random(hand, counts); */
+  /* rank_all_7_card_hands(); */
+  compute_pre_flop_equity_vs_random(hand, counts);
   /* compute_pre_flop_equity_vs_1_hand(hand, counts); */
   tac = clock();
   

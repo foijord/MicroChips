@@ -1,7 +1,29 @@
 #!/usr/bin/env python
 
-from constants import *
 from itertools import *
+
+card_ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2']
+card_suits = ['s', 'h', 'c', 'd']
+
+rank_keys5 = [79415, 43258, 19998, 12522, 5624, 2422, 992, 312, 94, 22, 5, 1, 0]
+rank_keys6 = [436437, 206930, 90838, 37951, 14270, 5760, 1734, 422, 98, 22, 5, 1, 0]
+rank_keys7 = [1479181, 636345, 262349, 83661, 22854, 8698, 2031, 453, 98, 22, 5, 1, 0]
+
+flush_keys = [4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1]
+
+suit_keys6 = [43, 7, 1, 0]
+suit_keys7 = [57, 8, 1, 0]
+
+max_5_card_rank_key = 4 * 79415 + 3 * 43258
+max_6_card_rank_key = 4 * 436437 + 3 * 206930
+max_7_card_rank_key = 4 * 1479181 + 3 * 636345
+
+max_5_card_flush_key = 4096 + 2048 + 1024 + 512 + 256
+max_6_card_flush_key = 4096 + 2048 + 1024 + 512 + 256 + 128
+max_7_card_flush_key = 4096 + 2048 + 1024 + 512 + 256 + 128 + 64
+
+flush_bit_shift = 9
+flush_bit_mask = 511
 
 class FiveEval:
     """
@@ -36,8 +58,8 @@ class FiveEval:
         self.compute_ranks(one_pair)
         self.compute_ranks(high_card)
 
-        open("ranks_5.dat", "w+").writelines(["%i\n" % i for i in self.ranks])
-        open("flushes_5.dat", "w+").writelines(["%i\n" % i for i in self.flushes])
+        open("data/ranks_5.dat", "w+").writelines(["%i\n" % i for i in self.ranks])
+        open("data/flushes_5.dat", "w+").writelines(["%i\n" % i for i in self.flushes])
 
     def compute_ranks(self, hands, is_flush = False):
         keys = flush_keys if is_flush else rank_keys5
@@ -80,9 +102,9 @@ class SevenEval:
         self.rank_all_flush_hands()
         self.init_flush_check()
 
-        open("ranks_7.dat", "w+").writelines(["%i\n" % i for i in self.ranks])
-        open("flushes_7.dat", "w+").writelines(["%i\n" % i for i in self.flushes])
-        open("flushcheck_7.dat", "w+").writelines(["%i\n" % i for i in self.flushcheck])
+        open("data/ranks_7.dat", "w+").writelines(["%i\n" % i for i in self.ranks])
+        open("data/flushes_7.dat", "w+").writelines(["%i\n" % i for i in self.flushes])
+        open("data/flushcheck_7.dat", "w+").writelines(["%i\n" % i for i in self.flushcheck])
 
     def rank_all_non_flush_hands(self):
         for c in combinations_with_replacement(list(range(13)), 7):
