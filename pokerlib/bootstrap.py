@@ -2,17 +2,44 @@
 
 from itertools import *
 
+def uniqueSums(keys, k, r):
+    """ 
+    return true if all sums of keys with length k with at most r
+    repetitions is unique among all such sums
+    """
+    sums = [sum(c) for c in combinations_with_replacement(keys, k) if max([c.count(i) for i in c]) <= r]
+    return len(sums) == len(set(sums))
+
+def generateKeys(n, k, r):
+    """
+    generates a list of n integers with the property that the sum of k
+    integers with at most r repetitions is unique among all such sums
+    """
+    keys = [0]
+    while len(keys) < n:
+        keys.append(keys[-1] + 1)
+        while not uniqueSums(keys, k, r): keys[-1] += 1
+    return keys
+
+def generateAllKeys():
+    print("suit keys for 5-card hands:", generateKeys(4, 5, 13))
+    print("suit keys for 6-card hands:", generateKeys(4, 6, 13))
+    print("suit keys for 7-card hands:", generateKeys(4, 7, 13))
+    print("rank keys for 5-card hands", generateKeys(13, 5, 4))
+    print("rank keys for 6-card hands", generateKeys(13, 6, 4))
+    print("rank keys for 7-card hands", generateKeys(13, 7, 4))
+
 card_ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2']
 card_suits = ['s', 'h', 'c', 'd']
 
+# keys below obtained by running generateAllKeys() (takes hours so hard-coded here)
 rank_keys5 = [79415, 43258, 19998, 12522, 5624, 2422, 992, 312, 94, 22, 5, 1, 0]
 rank_keys6 = [436437, 206930, 90838, 37951, 14270, 5760, 1734, 422, 98, 22, 5, 1, 0]
 rank_keys7 = [1479181, 636345, 262349, 83661, 22854, 8698, 2031, 453, 98, 22, 5, 1, 0]
-
-flush_keys = [4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1]
-
 suit_keys6 = [43, 7, 1, 0]
 suit_keys7 = [57, 8, 1, 0]
+
+flush_keys = [4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1]
 
 max_5_card_rank_key = 4 * 79415 + 3 * 43258
 max_6_card_rank_key = 4 * 436437 + 3 * 206930
