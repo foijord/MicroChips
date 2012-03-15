@@ -1,0 +1,21 @@
+import sys
+
+env = Environment()
+mode = ARGUMENTS.get('mode', 'release')
+sources = Glob('*c')
+
+if sys.platform == 'darwin':
+    env['CC'] = 'gcc'
+    if mode == 'release':
+        env['CFLAGS'] = '-O3'
+    else:
+        env['CFLAGS'] = '-g'
+
+if sys.platform == 'win':
+    env['CC'] = 'cl'
+    if mode == 'release':
+        env['CFLAGS'] = '-Ox'
+    else:
+        env['CFLAGS'] = ''
+
+env.Program('pokerlib', sources)
