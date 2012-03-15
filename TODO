@@ -1,5 +1,6 @@
 
-- compact rank/flush tables, write only index and keys
+- validate result of bootstrap script
+- compact rank/flush tables, write only index and keys?
 - compile pokerlib as shared library, load from python
 - command-loop Python program for equity calculations
 

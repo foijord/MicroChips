@@ -2,6 +2,29 @@
 
 from itertools import *
 
+card_ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2']
+card_suits = ['s', 'h', 'c', 'd']
+
+# keys below obtained by running generateAllKeys() (takes hours so hard-coded here)
+rank_keys5 = [79415, 43258, 19998, 12522, 5624, 2422, 992, 312, 94, 22, 5, 1, 0]
+rank_keys6 = [436437, 206930, 90838, 37951, 14270, 5760, 1734, 422, 98, 22, 5, 1, 0]
+rank_keys7 = [1479181, 636345, 262349, 83661, 22854, 8698, 2031, 453, 98, 22, 5, 1, 0]
+suit_keys6 = [43, 7, 1, 0]
+suit_keys7 = [57, 8, 1, 0]
+
+flush_keys = [4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1]
+
+max_5_card_rank_key = 4 * 79415 + 3 * 43258
+max_6_card_rank_key = 4 * 436437 + 3 * 206930
+max_7_card_rank_key = 4 * 1479181 + 3 * 636345
+
+max_5_card_flush_key = 4096 + 2048 + 1024 + 512 + 256
+max_6_card_flush_key = 4096 + 2048 + 1024 + 512 + 256 + 128
+max_7_card_flush_key = 4096 + 2048 + 1024 + 512 + 256 + 128 + 64
+
+flush_bit_shift = 9
+flush_bit_mask = 511
+
 def uniqueSums(keys, k, r):
     """ 
     return true if all sums of keys with length k with at most r
@@ -29,29 +52,6 @@ def generateAllKeys():
     print("rank keys for 6-card hands", generateKeys(13, 6, 4))
     print("rank keys for 7-card hands", generateKeys(13, 7, 4))
 
-card_ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2']
-card_suits = ['s', 'h', 'c', 'd']
-
-# keys below obtained by running generateAllKeys() (takes hours so hard-coded here)
-rank_keys5 = [79415, 43258, 19998, 12522, 5624, 2422, 992, 312, 94, 22, 5, 1, 0]
-rank_keys6 = [436437, 206930, 90838, 37951, 14270, 5760, 1734, 422, 98, 22, 5, 1, 0]
-rank_keys7 = [1479181, 636345, 262349, 83661, 22854, 8698, 2031, 453, 98, 22, 5, 1, 0]
-suit_keys6 = [43, 7, 1, 0]
-suit_keys7 = [57, 8, 1, 0]
-
-flush_keys = [4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1]
-
-max_5_card_rank_key = 4 * 79415 + 3 * 43258
-max_6_card_rank_key = 4 * 436437 + 3 * 206930
-max_7_card_rank_key = 4 * 1479181 + 3 * 636345
-
-max_5_card_flush_key = 4096 + 2048 + 1024 + 512 + 256
-max_6_card_flush_key = 4096 + 2048 + 1024 + 512 + 256 + 128
-max_7_card_flush_key = 4096 + 2048 + 1024 + 512 + 256 + 128 + 64
-
-flush_bit_shift = 9
-flush_bit_mask = 511
-
 class FiveEval:
     """
     Generate all 7462 unique 5-card poker hands, from the royal flush
@@ -75,42 +75,33 @@ class FiveEval:
         one_pair        = [[i] * 2 + list(c) for i in range(13) for c in combinations(list(range(13)), 3) if i not in c]
         high_card       = [list(c) for c in combinations(list(range(13)), 5) if list(c) not in straight]
 
-        self.compute_ranks(straight, True)
-        self.compute_ranks(four_of_a_kind)
-        self.compute_ranks(full_house)
-        self.compute_ranks(high_card, True)
-        self.compute_ranks(straight)
-        self.compute_ranks(three_of_a_kind)
-        self.compute_ranks(two_pair)
-        self.compute_ranks(one_pair)
-        self.compute_ranks(high_card)
+        self.assign_ranks(straight, True)
+        self.assign_ranks(four_of_a_kind)
+        self.assign_ranks(full_house)
+        self.assign_ranks(high_card, True)
+        self.assign_ranks(straight)
+        self.assign_ranks(three_of_a_kind)
+        self.assign_ranks(two_pair)
+        self.assign_ranks(one_pair)
+        self.assign_ranks(high_card)
 
         open("data/ranks_5.dat", "w+").writelines(["%i\n" % i for i in self.ranks])
         open("data/flushes_5.dat", "w+").writelines(["%i\n" % i for i in self.flushes])
 
-    def compute_ranks(self, hands, is_flush = False):
+    def assign_ranks(self, hands, is_flush = False):
         keys = flush_keys if is_flush else rank_keys5
-        array = self.flushes if is_flush else self.ranks
+        table = self.flushes if is_flush else self.ranks
         for hand in hands:
             # print(''.join([card_ranks[i] for i in hand]), self.current_rank) # debug
-            key = sum([keys[i] for i in hand])
-            array[key] = self.current_rank
+            index = sum([keys[i] for i in hand])
+            table[index] = self.current_rank
             self.current_rank -= 1
 
-    def getRankOfFive(self, c) :
-        if (c[0] & 3 == c[1] & 3 == c[2] & 3 == c[3] & 3 == c[4] & 3):
-            return self.flushes[flush_keys[c[0] >> 2] +
-                                flush_keys[c[1] >> 2] +
-                                flush_keys[c[2] >> 2] +
-                                flush_keys[c[3] >> 2] +
-                                flush_keys[c[4] >> 2]]
-                
-        else:
-            return self.ranks[rank_keys5[c[0] >> 2] +
-                              rank_keys5[c[1] >> 2] +
-                              rank_keys5[c[2] >> 2] +
-                              rank_keys5[c[3] >> 2] +
-                              rank_keys5[c[4] >> 2]]
+    def getRankOfFive(self, c):
+        is_flush = (c[0] & 3 == c[1] & 3 == c[2] & 3 == c[3] & 3 == c[4] & 3)
+        keys = flush_keys if is_flush else rank_keys5
+        index = sum(keys[i >> 2] for i in c)
+        return self.flushes[index] if is_flush else self.ranks[index]
 
     def getRank(self, hand):
         return max([self.getRankOfFive(five) for five in combinations(hand, 5)])
@@ -128,6 +119,8 @@ class SevenEval:
         self.rank_all_non_flush_hands()
         self.rank_all_flush_hands()
         self.init_flush_check()
+
+        self.deck = [(rank_keys7[i >> 2] << flush_bit_shift) + suit_keys7[i & 3] for i in range(52)]
 
         open("data/ranks_7.dat", "w+").writelines(["%i\n" % i for i in self.ranks])
         open("data/flushes_7.dat", "w+").writelines(["%i\n" % i for i in self.flushes])
@@ -154,6 +147,24 @@ class SevenEval:
                 suit_index = suit_count.index(max_count) 
                 self.flushcheck[sum(c)] = suit_keys7[suit_index]
 
+    def getRank(self, hand):
+        key = sum([self.deck[card] for card in hand])
+        flush_suit = self.flushcheck[key & flush_bit_mask]
+
+        if (flush_suit < 0):
+            return self.ranks[key >> flush_bit_shift]
+
+        keys = [flush_keys[i >> 2] for i in c if suit_keys7[i & 3] == flush_suit]
+        return self.flushes[sum(keys)]
+
 if __name__ == "__main__":
     five_eval = FiveEval()
     seven_eval = SevenEval(five_eval)
+
+    ranks = []
+    deck = list(range(52))
+    for c in combinations(deck, 5):
+        ranks.append(five_eval.getRankOfFive(c))
+        
+    ranks = set(ranks)
+    if len(ranks) != 7462: print("five card evaluator invalid")
