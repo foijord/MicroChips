@@ -11,7 +11,7 @@ if sys.platform == 'darwin':
     else:
         env['CFLAGS'] = '-g'
 
-if sys.platform == 'win':
+if sys.platform == 'win32':
     env['CC'] = 'cl'
     if mode == 'release':
         env['CFLAGS'] = '-Ox'

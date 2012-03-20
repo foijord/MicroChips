@@ -54,12 +54,13 @@ def generateAllKeys():
 
 class FiveEval:
     """
-    Generate all 7462 unique 5-card poker hands, from the royal flush
-    to the seven high, and assign them a rank from 7462 to 1. The
-    non-flush hands are stored in the rank list, with an index
-    computed by summing the card keys obtained from the keygen
-    script. The flush hands are stored in the flushes array, with an
-    index obtained by summing the corresponding flush keys.
+    Generate all 7462 unique 5-card poker hands, ordered from highest
+    value (royal flush) to lowest value (7-high), and assign them a
+    rank from 7462 to 1. The non-flush hands are stored in the rank
+    list, with an index computed by summing the card keys obtained
+    from the keygen script. The flush hands are stored in the flushes
+    array, with an index obtained by summing the corresponding flush
+    keys.
     """
     def __init__(self):
         self.current_rank = 7462
