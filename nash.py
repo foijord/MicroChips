@@ -168,7 +168,7 @@ Decision node:
  - fold, call, raise
  - children: 0 or 1 Decision nodes + Showdown nodes for call, fold
 
-Showdown node:
+Terminal node:
   - compute equity for SB and BB
 
 Traversal (Game) State:
@@ -178,15 +178,53 @@ Traversal (Game) State:
  
 """
 
-BET = 1
-ANTE = 2
-DECK = [0, 1, 2]
+FOLD = 0
+CALL = 1
+RAISE = 2
 
-SB_OPTIONS = [FOLD, RAISE_FOLD, RAISE_CALL, RAISE_RAISE]
-BB_OPTIONS = [FOLD, CALL, RAISE_FOLD, RAISE_CALL]
+class Pot:
+    def __init__(self):
+        self.bets = [2] * 2
 
-""" initial strategy of always raising """
-ALWAYS_RAISE = [[0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 1]]
+class State:
+    def __init__(self):
+        self.action = FOLD
+        self.player = None
+
+class Decision:
+    def __init__(self, player):
+        self.player = player
+        self.children = []
+
+    def addChild(self, child):
+        self.children.append(child)
+        
+    def traverse(self, state):
+        state.player = self.player
+        self.children[state.action].traverse(state)
+
+class Raise:
+    def __init__(self):
+        self.child = None
+
+    def traverse(self, state):
+        state.pot.bets[state.player] += 1
+        self.child.traverse(state)
+
+class Fold:
+    def __init__(self):
+        pass
+
+    def traverse(self, state):
+        pass
+
+class Call:
+    def __init__(self):
+        pass
+
+    def traverse(self, state):
+        state.pot.bets[state.player] += 1
+        print("pot size: ", sum(state.pot.bets))
 
 if __name__ == "__main__":
     sys.exit(0)
