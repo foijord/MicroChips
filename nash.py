@@ -32,81 +32,150 @@ Game Tree:
      \
       call
 
+
+SB: card 1 BB: card 1
+
+  SB -- fold [SB -2 BB 2]
+   | 
+ raise
+   |
+  BB -- fold [SB 2 BB -2]
+   | \
+   |  call   [SB 0 BB 0]
+ raise
+   |
+  SB -- fold [SB -3 BB 3]
+   | \
+   |  call   [SB 0 BB 0]
+ raise
+   |
+  BB -- fold [SB 4 BB -4]
+     \
+      call   [SB 0 BB 0]
+
 SB starts with the strategy of always raising.
 
-Strategy ALWAYS RAISE:
+Weights for Strategy ALWAYS_RAISE:
 1: [0.0, 0.0, 0.0, 1.0]
 2: [0.0, 0.0, 0.0, 1.0]
 3: [0.0, 0.0, 0.0, 1.0]
 
 We must find the BB strategy that gives the highest equity against
-ALWAYS_RAISE. This means for each possible holding, we must figure out
-the equity of FOLD, CALL, RAISE_FOLD and RAISE_CALL.
+ALWAYS_RAISE. This means for each possible SB strategy (FOLD,
+RAISE_FOLD, RAISE_CALL, RAISE_RAISE), for each possible card, we must
+figure out the equity of BBs options (FOLD, CALL, RAISE_FOLD and
+RAISE_CALL)
 
-SB is holding a 1, 2, or 3 with equal probability
+BB FOLD: (Pot contribution: 2 chips)
+SB_OPTIONS = [FOLD, RAISE_FOLD, RAISE_CALL, RAISE_RAISE]
+BB_OPTIONS = [FOLD, CALL, RAISE_FOLD, RAISE_CALL]
 
-FOLD:
-(Pot contribution: 2 chips)
-         win tie lose ev
-      1:  0   0   3   -2
-Hand  2:  0   0   3   -2
-      3:  0   0   3   -2
+BB 1:
 
-CALL:
-(Pot contribution: 3 chips)
-         win tie lose ev
-      1:  0   1   2   -3
-Hand  2:  1   1   1    0
-      3:  2   1   0   +3
+SB 1: [0.0, 0.0, 0.0, 1.0] dot [2, -2, -2, -2] -2
+SB 2: [0.0, 0.0, 0.0, 1.0] dot [2, -2, -2, -2] -2 -2
+SB 3: [0.0, 0.0, 0.0, 1.0] dot [2, -2, -2, -2] -2
 
-RAISE_FOLD:
-(Pot contribution: 4 chips)
-         win tie lose ev
-      1:  0   0   3   -4
-Hand  2:  0   0   3   -4
-      3:  0   0   3   -4
+BB 2:
 
-RAISE_CALL:
-(Pot contribution: 5 chips)
-         win tie lose ev
-      1:  0   1   2   -5
-Hand  2:  1   1   1    0
-      3:  2   1   0   +5
+SB 1: [0.0, 0.0, 0.0, 1.0] dot [2, -2, -2, -2] -2
+SB 2: [0.0, 0.0, 0.0, 1.0] dot [2, -2, -2, -2] -2 -2
+SB 3: [0.0, 0.0, 0.0, 1.0] dot [2, -2, -2, -2] -2
 
+BB 3:
 
-So the best strategy against ALWAYS RAISE is:
+SB 1: [0.0, 0.0, 0.0, 1.0] dot [2, -2, -2, -2] -2
+SB 2: [0.0, 0.0, 0.0, 1.0] dot [2, -2, -2, -2] -2 -2
+SB 3: [0.0, 0.0, 0.0, 1.0] dot [2, -2, -2, -2] -2
 
-1: [1.0, 0.0, 0.0, 0.0]
+BB CALL: (Pot contribution: 3 chips)
+SB_OPTIONS = [FOLD, RAISE_FOLD, RAISE_CALL, RAISE_RAISE]
+
+BB 1: 
+
+SB 1: [0.0, 0.0, 0.0, 1.0] dot [2,  0,  0,  0]  0
+SB 2: [0.0, 0.0, 0.0, 1.0] dot [2, -3, -3, -3] -3 -2
+SB 3: [0.0, 0.0, 0.0, 1.0] dot [2, -3, -3, -3] -3
+
+BB 2:
+
+SB 1: [0.0, 0.0, 0.0, 1.0] dot [2,  3,  3,  3]  3
+SB 2: [0.0, 0.0, 0.0, 1.0] dot [2,  0,  0,  0]  0  0
+SB 3: [0.0, 0.0, 0.0, 1.0] dot [2, -3, -3, -3] -3
+
+BB 3:
+
+SB 1: [0.0, 0.0, 0.0, 1.0] dot [2,  3,  3,  3]  3
+SB 2: [0.0, 0.0, 0.0, 1.0] dot [2,  3,  3,  3]  3  2
+SB 3: [0.0, 0.0, 0.0, 1.0] dot [2,  0,  0,  0]  0
+
+BB RAISE_FOLD: (Pot contribution: 4 chips)
+SB_OPTIONS = [FOLD, RAISE_FOLD, RAISE_CALL, RAISE_RAISE]
+
+BB 1:
+
+SB 1: [0.0, 0.0, 0.0, 1.0] dot [2,  3,  0, -4] -4
+SB 2: [0.0, 0.0, 0.0, 1.0] dot [2,  3, -4, -4] -4 -4
+SB 3: [0.0, 0.0, 0.0, 1.0] dot [2,  3, -4, -4] -4
+
+BB 2:
+
+SB 1: [0.0, 0.0, 0.0, 1.0] dot [2,  3,  4, -4] -4
+SB 2: [0.0, 0.0, 0.0, 1.0] dot [2,  3,  0, -4] -4 -4
+SB 3: [0.0, 0.0, 0.0, 1.0] dot [2,  3, -4, -4] -4
+
+BB 3:
+
+SB 1: [0.0, 0.0, 0.0, 1.0] dot [2,  3,  4, -4] -4
+SB 2: [0.0, 0.0, 0.0, 1.0] dot [2,  3,  4, -4] -4 -4
+SB 3: [0.0, 0.0, 0.0, 1.0] dot [2,  3,  0, -4] -4
+
+BB RAISE_CALL: (Pot contribution: 4 or 5 chips)
+SB_OPTIONS = [FOLD, RAISE_FOLD, RAISE_CALL, RAISE_RAISE]
+
+BB 1:
+
+SB 1: [0.0, 0.0, 0.0, 1.0] dot [2,  3,  0,  0]  0
+SB 2: [0.0, 0.0, 0.0, 1.0] dot [2,  3, -4, -5] -5 -3.33
+SB 3: [0.0, 0.0, 0.0, 1.0] dot [2,  3, -4, -5] -5
+
+BB 2:
+
+SB 1: [0.0, 0.0, 0.0, 1.0] dot [2,  3,  4,  5]  5
+SB 2: [0.0, 0.0, 0.0, 1.0] dot [2,  3,  0,  0]  0   0
+SB 3: [0.0, 0.0, 0.0, 1.0] dot [2,  3, -4, -5] -5
+
+BB 3:
+
+SB 1: [0.0, 0.0, 0.0, 1.0] dot [2,  3,  4,  5]  5
+SB 2: [0.0, 0.0, 0.0, 1.0] dot [2,  3,  4,  5]  5  3.33
+SB 3: [0.0, 0.0, 0.0, 1.0] dot [2,  3,  0,  0]  0
+
+So an optimal mixed strategy against ALWAYS RAISE is:
+
+1: [0.5, 0.5, 0.0, 0.0]
 2: [0.0, 0.5, 0.0, 0.5]
 3: [0.0, 0.0, 0.0, 1.0]
 
-If BB is holding a 1, he should always fold.
-If BB is holding a 2, he should always call or raise, then call.
-If BB is holding a 3, he should always raise, then call.
+If BB is holding a 1, he should fold half the time and call half the time
+If BB is holding a 2, he should call half the time and raise-call half the time
+If BB is holding a 3, he should raise-call every time
 
-This strategy will win (5 + 0 -2) / 3 = 1 chip per hand
+Game Tree Nodes:
 
-What's the best strategy against this counter-strategy?
+Decision node:
+ - type: SB or BB
+ - fold, call, raise
+ - children: 0 or 1 Decision nodes + Showdown nodes for call, fold
 
-FOLD:
-(Pot contribution: 2 chips)
-         win tie lose ev
-      1:  0   0   3   -2
-Hand  2:  0   0   3   -2
-      3:  0   0   3   -2
+Showdown node:
+  - compute equity for SB and BB
 
-
-RAISE_FOLD:
-
-If SB is raising, BB will fold 1/3rd of the time, call 1/6th of the
-time and raise half the time. If BB is raising, SB is losing, since
-SB must then fold. SB puts 3 chips in the pot.
-
-SB 1: BB 1: BB folds a 1            ev  2 * 1.0
-SB 1: BB 2: BB calls with a 2.      ev -3 * 0.5
-SB 1: BB 2: BB raises, SB folds.    ev -3 * 0.5
-SB 1: BB 3: BB raises, SB folds.    ev -3 * 1.0
-
+Traversal (Game) State:
+ - pot: num chips contributed by each decision node type (SB or BB)
+ - cards held by SB and BB
+ - strategy options and weights for SB and BB
+ 
 """
 
 BET = 1
@@ -119,27 +188,5 @@ BB_OPTIONS = [FOLD, CALL, RAISE_FOLD, RAISE_CALL]
 """ initial strategy of always raising """
 ALWAYS_RAISE = [[0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 1]]
 
-"""
-
-"""
-
-def getEquityVersusStrategy(strategy):
-    pass
-
-def getBestResponse(strategy, options):
-    response = []
-    for s in strategy:
-        for weight in s:
-            pass
-    return response
-
 if __name__ == "__main__":
-    sb_strategy = ALWAYS_RAISE
-    bb_strategy = None
-
-    bbstrategy = getBestResponse(sb_strategy, BB_OPTIONS)
-
-    print(sbstrategy)
-    print(bbstrategy)
-    
     sys.exit(0)
