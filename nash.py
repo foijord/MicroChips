@@ -32,27 +32,6 @@ Game Tree:
      \
       call
 
-
-SB: card 1 BB: card 1
-
-  SB -- fold [SB -2 BB 2]
-   | 
- raise
-   |
-  BB -- fold [SB 2 BB -2]
-   | \
-   |  call   [SB 0 BB 0]
- raise
-   |
-  SB -- fold [SB -3 BB 3]
-   | \
-   |  call   [SB 0 BB 0]
- raise
-   |
-  BB -- fold [SB 4 BB -4]
-     \
-      call   [SB 0 BB 0]
-
 SB starts with the strategy of always raising.
 
 Weights for Strategy ALWAYS_RAISE:
@@ -177,54 +156,63 @@ Traversal (Game) State:
  - strategy options and weights for SB and BB
  
 """
-
-FOLD = 0
-CALL = 1
-RAISE = 2
-
-class Pot:
+class Player:
     def __init__(self):
+        self.strategy = []
+        self.currentmove = -1
+
+    def nextMove(self):
+        self.currentmove += 1
+        return self.strategy[self.currentmove]
+
+class GameState:
+    def __init__(self):
+        self.players = [Player(), Player()]
+        self.playerid = -1
         self.bets = [2] * 2
 
-class State:
-    def __init__(self):
-        self.action = FOLD
-        self.player = None
-
 class Decision:
-    def __init__(self, player):
-        self.player = player
-        self.children = []
+    def __init__(self, playerid):
+        self.playerid = playerid
+        self.children = [Fold(), Call()]
 
     def addChild(self, child):
         self.children.append(child)
-        
-    def traverse(self, state):
-        state.player = self.player
-        self.children[state.action].traverse(state)
+        return self
+
+    def computeEquity(self, gamestate):
+        gamestate.playerid = self.playerid
+        option = gamestate.players[self.playerid].nextMove()
+        self.children[option].computeEquity(gamestate)
 
 class Raise:
     def __init__(self):
         self.child = None
 
-    def traverse(self, state):
-        state.pot.bets[state.player] += 1
-        self.child.traverse(state)
+    def setChild(self, child):
+        self.child = child
+        return self
+
+    def computeEquity(self, gamestate):
+        gamestate.bets[gamestate.playerid] += 1
+        self.child.computeEquity(gamestate)
 
 class Fold:
-    def __init__(self):
-        pass
-
-    def traverse(self, state):
-        pass
+    def computeEquity(self, gamestate):
+        gamestate.computeEquity(self)
 
 class Call:
-    def __init__(self):
-        pass
-
-    def traverse(self, state):
-        state.pot.bets[state.player] += 1
-        print("pot size: ", sum(state.pot.bets))
+    def computeEquity(self, gamestate):
+        gamestate.computeEquity(self)
 
 if __name__ == "__main__":
+    Root = \
+    (Decision(0)).addChild((Raise()).setChild(
+            (Decision(1)).addChild((Raise()).setChild(
+                    (Decision(0)).addChild((Raise()).setChild(
+                            (Decision(1))))))))
+
+    state = GameState()
+    #Root.computeEquity(state)
+    
     sys.exit(0)
