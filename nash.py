@@ -156,20 +156,29 @@ Traversal (Game) State:
  - strategy options and weights for SB and BB
  
 """
+
+FOLD = 0
+CALL = 1
+RAISE = 2
+
 class Player:
-    def __init__(self):
-        self.strategy = []
+    def __init__(self, strategy):
+        self.strategy = strategy
         self.currentmove = -1
 
     def nextMove(self):
         self.currentmove += 1
+        assert self.currentmove < len(self.strategy)
         return self.strategy[self.currentmove]
 
 class GameState:
     def __init__(self):
-        self.players = [Player(), Player()]
+        self.players = [Player([RAISE, FOLD]), Player([RAISE])]
         self.playerid = -1
         self.bets = [2] * 2
+
+    def computeEquity(self, node):
+        print(self.bets)
 
 class Decision:
     def __init__(self, playerid):
@@ -194,7 +203,8 @@ class Raise:
         return self
 
     def computeEquity(self, gamestate):
-        gamestate.bets[gamestate.playerid] += 1
+        currentbet = gamestate.bets[gamestate.playerid - 1]
+        gamestate.bets[gamestate.playerid] = currentbet + 1
         self.child.computeEquity(gamestate)
 
 class Fold:
@@ -213,6 +223,6 @@ if __name__ == "__main__":
                             (Decision(1))))))))
 
     state = GameState()
-    #Root.computeEquity(state)
+    Root.computeEquity(state)
     
     sys.exit(0)
