@@ -15,7 +15,7 @@ reraise to 3 chips. BB must now call or fold.
 Game Tree:
 
   SB -- fold
-   | 
+   |
  raise
    |
   BB -- fold
@@ -162,67 +162,80 @@ CALL = 1
 RAISE = 2
 
 class Player:
-    def __init__(self, strategy):
-        self.strategy = strategy
-        self.currentmove = -1
-
-    def nextMove(self):
-        self.currentmove += 1
-        assert self.currentmove < len(self.strategy)
-        return self.strategy[self.currentmove]
+    def __init__(self):
+        self.bet = 2
+        self.card = -1
 
 class GameState:
-    def __init__(self):
-        self.players = [Player([RAISE, FOLD]), Player([RAISE])]
-        self.playerid = -1
-        self.bets = [2] * 2
-
-    def computeEquity(self, node):
-        print(self.bets)
+    def __init__(self, players):
+        self.players = players
+        self.player = None
+        self.bet = 0
+        self.pot = 4
 
 class Decision:
-    def __init__(self, playerid):
-        self.playerid = playerid
-        self.children = [Fold(), Call()]
-
-    def addChild(self, child):
-        self.children.append(child)
-        return self
+    def __init__(self, player, children):
+        self.player = player
+        self.children = children
 
     def computeEquity(self, gamestate):
-        gamestate.playerid = self.playerid
-        option = gamestate.players[self.playerid].nextMove()
-        self.children[option].computeEquity(gamestate)
+        gamestate.player = self.player
+        for c in self.children:
+            c.computeEquity(gamestate)
 
 class Raise:
-    def __init__(self):
-        self.child = None
-
-    def setChild(self, child):
-        self.child = child
-        return self
+    def __init__(self, decision):
+        self.decision = decision
 
     def computeEquity(self, gamestate):
-        currentbet = gamestate.bets[gamestate.playerid - 1]
-        gamestate.bets[gamestate.playerid] = currentbet + 1
-        self.child.computeEquity(gamestate)
+        gamestate.bet += 1
+        gamestate.player.bet += gamestate.bet
+        self.decision.computeEquity(gamestate)
 
 class Fold:
+    def __init__(self):
+        self.equity = [0, 0]
+
     def computeEquity(self, gamestate):
-        gamestate.computeEquity(self)
+        idx = gamestate.players.index(gamestate.player)
+        self.equity[idx - 0] = -gamestate.player.bet
+        self.equity[idx - 1] =  gamestate.player.bet
+        print(self.equity)
 
 class Call:
+    def __init__(self):
+        self.equity = [0, 0]
+
     def computeEquity(self, gamestate):
-        gamestate.computeEquity(self)
+        bet = gamestate.player.bet + 1
+
+        idx = gamestate.players.index(gamestate.player)
+        if gamestate.players[idx].card > gamestate.players[idx - 1].card:
+            self.equity[idx - 0] = bet
+            self.equity[idx - 1] = -bet
+        if gamestate.players[idx].card < gamestate.players[idx - 1].card:
+            self.equity[idx - 0] = -bet
+            self.equity[idx - 1] = bet
+        if gamestate.players[idx].card == gamestate.players[idx - 1].card:
+            self.equity[idx - 0] = 0
+            self.equity[idx - 1] = 0
+        print(self.equity)
+
 
 if __name__ == "__main__":
-    Root = \
-    (Decision(0)).addChild((Raise()).setChild(
-            (Decision(1)).addChild((Raise()).setChild(
-                    (Decision(0)).addChild((Raise()).setChild(
-                            (Decision(1))))))))
 
-    state = GameState()
-    Root.computeEquity(state)
+    player1 = Player()
+    player2 = Player()
+
+    Root = Decision(player1, [Fold(), Raise(
+                Decision(player2, [Fold(), Call(), Raise(
+                            Decision(player1, [Fold(), Call(), Raise(
+                                        Decision(player2, [Fold(), Call()]))]))]))])
     
+    player1.card = 1
+    player2.card = 1
+
+    state = GameState([player1, player2])
+    Root.computeEquity(state)
+
     sys.exit(0)
