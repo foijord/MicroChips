@@ -157,26 +157,34 @@ Traversal (Game) State:
  
 """
 
-FOLD = 0
-CALL = 1
-RAISE = 2
-
 class Player:
     def __init__(self):
         self.bet = 2
         self.card = -1
+        self.strategy = None
+        self.currentmove = -1
+
+    def nextMove(self):
+        self.currentmove += 1
+        return self.strategy[self.currentmove]
 
 class GameState:
     def __init__(self, players):
         self.players = players
         self.player = None
         self.bet = 0
-        self.pot = 4
+        for player in self.players:
+            player.currentmove = -1
+            player.bet = 2
+
 
 class Decision:
     def __init__(self, player, children):
         self.player = player
         self.children = children
+
+    def getEquity(self):
+        return self.children[self.player.nextMove()].getEquity()
 
     def computeEquity(self, gamestate):
         gamestate.player = self.player
@@ -187,6 +195,9 @@ class Raise:
     def __init__(self, decision):
         self.decision = decision
 
+    def getEquity(self):
+        return self.decision.getEquity()
+
     def computeEquity(self, gamestate):
         gamestate.bet += 1
         gamestate.player.bet += gamestate.bet
@@ -196,15 +207,21 @@ class Fold:
     def __init__(self):
         self.equity = [0, 0]
 
+    def getEquity(self):
+        return self.equity[1]
+
     def computeEquity(self, gamestate):
         idx = gamestate.players.index(gamestate.player)
         self.equity[idx - 0] = -gamestate.player.bet
         self.equity[idx - 1] =  gamestate.player.bet
-        print(self.equity)
+        #print(self.equity)
 
 class Call:
     def __init__(self):
         self.equity = [0, 0]
+
+    def getEquity(self):
+        return self.equity[1]
 
     def computeEquity(self, gamestate):
         bet = gamestate.player.bet + 1
@@ -219,23 +236,34 @@ class Call:
         if gamestate.players[idx].card == gamestate.players[idx - 1].card:
             self.equity[idx - 0] = 0
             self.equity[idx - 1] = 0
-        print(self.equity)
+        #print(self.equity)
 
+
+FOLD = 0
+CALL = 1
+RAISE = 2
+
+SB_STRATEGIES = [[FOLD], [RAISE, FOLD], [RAISE, CALL], [RAISE, RAISE]]
+BB_STRATEGIES = [[FOLD], [CALL], [RAISE, FOLD], [RAISE, CALL]]
 
 if __name__ == "__main__":
 
     player1 = Player()
     player2 = Player()
 
-    Root = Decision(player1, [Fold(), Raise(
+    Root = Decision(player1, [Fold(), Call(), Raise(
                 Decision(player2, [Fold(), Call(), Raise(
                             Decision(player1, [Fold(), Call(), Raise(
                                         Decision(player2, [Fold(), Call()]))]))]))])
-    
-    player1.card = 1
-    player2.card = 1
 
-    state = GameState([player1, player2])
-    Root.computeEquity(state)
+    for player2.strategy in BB_STRATEGIES:
+        for player2.card in [1, 2, 3]:
+            for player1.card in [1, 2, 3]:
+                equity = []
+                for player1.strategy in SB_STRATEGIES:
+                    state = GameState([player1, player2])
+                    Root.computeEquity(state)
+                    equity += [Root.getEquity()]
+                print(player1.card, player2.card, equity)
 
     sys.exit(0)
