@@ -157,12 +157,53 @@ Traversal (Game) State:
  
 """
 
+class FictiousPlay:
+    def __init__(self, gametree):
+        self.gametree = gametree
+
+    def updatePlayerProbabilities(self, probabilities, response, n):
+        for i in range(len(probabilities)):
+            probabilities[i] *= (n / (n + 1))
+            probabilities[i] += response[i] / (n + 1)
+
+    def computeBestResponse(self, player1, player2):
+        best_response = []
+        for player1.card in [1, 2, 3]:
+            equity_by_strategy = []
+            for player1.strategy in player1.strategies:
+                equitybycard = []
+                for player2.card in [1, 2, 3]:
+                    equity = []
+                    for player2.strategy in player2.strategies:
+                        state = GameState([player1, player2])
+                        self.gametree.computeEquity(state)
+                        equity += [gametree.getEquity()]
+                    weights = player2.probabilities[player2.card - 1]
+                    equitybycard += [dot(equity, weights) / 3.0]
+                equity_by_strategy += [sum(equitybycard)]
+            max_equity = max(equity_by_strategy)
+            response = [0] * 4
+            response[equity_by_strategy.index(max_equity)] = 1
+            self.updatePlayerProbabilities(player1.probabilities[player1.card - 1], response, player1.n)
+            best_response += [response]
+        player1.n += 1
+            
+
+def dot(v1, v2):
+    assert len(v1) == len(v2)
+    return sum([v1[i] * v2[i] for i in range(len(v1))])
+
 class Player:
     def __init__(self):
+        self.n = 1.0
         self.bet = 2
         self.card = -1
-        self.strategy = None
         self.currentmove = -1
+        self.strategy = None
+        self.strategies = None
+        self.probabilities = [[1, 0, 0, 0],
+                              [1, 0, 0, 0],
+                              [1, 0, 0, 0]]
 
     def nextMove(self):
         self.currentmove += 1
@@ -172,11 +213,13 @@ class GameState:
     def __init__(self, players):
         self.players = players
         self.player = None
+        self.reset()
+
+    def reset(self):
         self.bet = 0
         for player in self.players:
             player.currentmove = -1
             player.bet = 2
-
 
 class Decision:
     def __init__(self, player, children):
@@ -208,24 +251,22 @@ class Fold:
         self.equity = [0, 0]
 
     def getEquity(self):
-        return self.equity[1]
+        return self.equity[0]
 
     def computeEquity(self, gamestate):
         idx = gamestate.players.index(gamestate.player)
         self.equity[idx - 0] = -gamestate.player.bet
         self.equity[idx - 1] =  gamestate.player.bet
-        #print(self.equity)
 
 class Call:
     def __init__(self):
         self.equity = [0, 0]
 
     def getEquity(self):
-        return self.equity[1]
+        return self.equity[0]
 
     def computeEquity(self, gamestate):
         bet = gamestate.player.bet + 1
-
         idx = gamestate.players.index(gamestate.player)
         if gamestate.players[idx].card > gamestate.players[idx - 1].card:
             self.equity[idx - 0] = bet
@@ -236,7 +277,6 @@ class Call:
         if gamestate.players[idx].card == gamestate.players[idx - 1].card:
             self.equity[idx - 0] = 0
             self.equity[idx - 1] = 0
-        #print(self.equity)
 
 
 FOLD = 0
@@ -246,24 +286,35 @@ RAISE = 2
 SB_STRATEGIES = [[FOLD], [RAISE, FOLD], [RAISE, CALL], [RAISE, RAISE]]
 BB_STRATEGIES = [[FOLD], [CALL], [RAISE, FOLD], [RAISE, CALL]]
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     player1 = Player()
     player2 = Player()
 
-    Root = Decision(player1, [Fold(), Call(), Raise(
+    player1.strategies = SB_STRATEGIES
+    player2.strategies = BB_STRATEGIES
+
+    player1.probabilities = [[0, 0, 0, 1],
+                             [0, 0, 0, 1],
+                             [0, 0, 0, 1]]
+
+
+    gametree = Decision(player1, [Fold(), Call(), Raise(
                 Decision(player2, [Fold(), Call(), Raise(
                             Decision(player1, [Fold(), Call(), Raise(
                                         Decision(player2, [Fold(), Call()]))]))]))])
 
-    for player2.strategy in BB_STRATEGIES:
-        for player2.card in [1, 2, 3]:
-            for player1.card in [1, 2, 3]:
-                equity = []
-                for player1.strategy in SB_STRATEGIES:
-                    state = GameState([player1, player2])
-                    Root.computeEquity(state)
-                    equity += [Root.getEquity()]
-                print(player1.card, player2.card, equity)
+    fp = FictiousPlay(gametree)
+    for i in range(10000):
+        fp.computeBestResponse(player2, player1)
+        fp.computeBestResponse(player1, player2)
+
+    for p in player1.probabilities:
+        for p2 in p:
+            print("%.3f" % p2)
+
+    for p in player2.probabilities:
+        for p2 in p:
+            print("%.3f" % p2)
 
     sys.exit(0)
