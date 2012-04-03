@@ -157,36 +157,44 @@ Traversal (Game) State:
  
 """
 
-class FictiousPlay:
+class FictitiousPlay:
     def __init__(self, gametree):
         self.gametree = gametree
 
-    def updatePlayerProbabilities(self, probabilities, response, n):
-        for i in range(len(probabilities)):
-            probabilities[i] *= (n / (n + 1))
-            probabilities[i] += response[i] / (n + 1)
+    def updatePlayerProbabilities(self, player, best_response):
+        n = player.n
+        for i in range(len(player.probabilities)):
+            probabilities = player.probabilities[i]
+            response = best_response[i]
+            for j in range(len(probabilities)):
+                probabilities[j] *= (n / (n + 1))
+                probabilities[j] += response[j] / (n + 1)
+
+        player.n += 1
+
+    def computeEquityByCard(self, player1, player2):
+        equitybycard = []
+        for player2.card in [1, 2, 3]:
+            state = GameState([player1, player2])
+            self.gametree.computeEquity(state)
+            equity = [self.gametree.getEquity(state) for player2.strategy in player2.strategies]
+            probabilities = player2.probabilities[player2.card - 1]
+            equitybycard += [dot(equity, probabilities) / 3.0]
+        return equitybycard
 
     def computeBestResponse(self, player1, player2):
         best_response = []
         for player1.card in [1, 2, 3]:
             equity_by_strategy = []
             for player1.strategy in player1.strategies:
-                equitybycard = []
-                for player2.card in [1, 2, 3]:
-                    equity = []
-                    for player2.strategy in player2.strategies:
-                        state = GameState([player1, player2])
-                        self.gametree.computeEquity(state)
-                        equity += [gametree.getEquity()]
-                    weights = player2.probabilities[player2.card - 1]
-                    equitybycard += [dot(equity, weights) / 3.0]
-                equity_by_strategy += [sum(equitybycard)]
+                equity_by_card = self.computeEquityByCard(player1, player2)
+                equity_by_strategy += [sum(equity_by_card)]
             max_equity = max(equity_by_strategy)
             response = [0] * 4
             response[equity_by_strategy.index(max_equity)] = 1
-            self.updatePlayerProbabilities(player1.probabilities[player1.card - 1], response, player1.n)
             best_response += [response]
-        player1.n += 1
+
+        self.updatePlayerProbabilities(player1, best_response)
             
 
 def dot(v1, v2):
@@ -226,8 +234,8 @@ class Decision:
         self.player = player
         self.children = children
 
-    def getEquity(self):
-        return self.children[self.player.nextMove()].getEquity()
+    def getEquity(self, gamestate):
+        return self.children[self.player.nextMove()].getEquity(gamestate)
 
     def computeEquity(self, gamestate):
         gamestate.player = self.player
@@ -238,8 +246,8 @@ class Raise:
     def __init__(self, decision):
         self.decision = decision
 
-    def getEquity(self):
-        return self.decision.getEquity()
+    def getEquity(self, gamestate):
+        return self.decision.getEquity(gamestate)
 
     def computeEquity(self, gamestate):
         gamestate.bet += 1
@@ -250,7 +258,8 @@ class Fold:
     def __init__(self):
         self.equity = [0, 0]
 
-    def getEquity(self):
+    def getEquity(self, gamestate):
+        gamestate.reset()
         return self.equity[0]
 
     def computeEquity(self, gamestate):
@@ -262,7 +271,8 @@ class Call:
     def __init__(self):
         self.equity = [0, 0]
 
-    def getEquity(self):
+    def getEquity(self, gamestate):
+        gamestate.reset()        
         return self.equity[0]
 
     def computeEquity(self, gamestate):
@@ -304,8 +314,8 @@ if __name__ == "__main__":
                             Decision(player1, [Fold(), Call(), Raise(
                                         Decision(player2, [Fold(), Call()]))]))]))])
 
-    fp = FictiousPlay(gametree)
-    for i in range(10000):
+    fp = FictitiousPlay(gametree)
+    for i in range(1000):
         fp.computeBestResponse(player2, player1)
         fp.computeBestResponse(player1, player2)
 
