@@ -169,15 +169,13 @@ class FictitiousPlay:
             for j in range(len(probabilities)):
                 probabilities[j] *= (n / (n + 1))
                 probabilities[j] += response[j] / (n + 1)
-
         player.n += 1
 
     def computeEquityByCard(self, player1, player2):
         equitybycard = []
         for player2.card in [1, 2, 3]:
             state = GameState([player1, player2])
-            self.gametree.computeEquity(state)
-            equity = [self.gametree.getEquity(state) for player2.strategy in player2.strategies]
+            equity = [self.gametree.computeEquity(state) for player2.strategy in player2.strategies]
             probabilities = player2.probabilities[player2.card - 1]
             equitybycard += [dot(equity, probabilities) / 3.0]
         return equitybycard
@@ -234,46 +232,33 @@ class Decision:
         self.player = player
         self.children = children
 
-    def getEquity(self, gamestate):
-        return self.children[self.player.nextMove()].getEquity(gamestate)
-
     def computeEquity(self, gamestate):
         gamestate.player = self.player
-        for c in self.children:
-            c.computeEquity(gamestate)
+        return self.children[self.player.nextMove()].computeEquity(gamestate)
 
 class Raise:
     def __init__(self, decision):
         self.decision = decision
 
-    def getEquity(self, gamestate):
-        return self.decision.getEquity(gamestate)
-
     def computeEquity(self, gamestate):
         gamestate.bet += 1
         gamestate.player.bet += gamestate.bet
-        self.decision.computeEquity(gamestate)
+        return self.decision.computeEquity(gamestate)
 
 class Fold:
     def __init__(self):
         self.equity = [0, 0]
 
-    def getEquity(self, gamestate):
-        gamestate.reset()
-        return self.equity[0]
-
     def computeEquity(self, gamestate):
         idx = gamestate.players.index(gamestate.player)
         self.equity[idx - 0] = -gamestate.player.bet
         self.equity[idx - 1] =  gamestate.player.bet
+        gamestate.reset()
+        return self.equity[0]
 
 class Call:
     def __init__(self):
         self.equity = [0, 0]
-
-    def getEquity(self, gamestate):
-        gamestate.reset()        
-        return self.equity[0]
 
     def computeEquity(self, gamestate):
         bet = gamestate.player.bet + 1
@@ -287,6 +272,8 @@ class Call:
         if gamestate.players[idx].card == gamestate.players[idx - 1].card:
             self.equity[idx - 0] = 0
             self.equity[idx - 1] = 0
+        gamestate.reset()        
+        return self.equity[0]
 
 
 FOLD = 0
