@@ -157,42 +157,31 @@ Traversal (Game) State:
  
 """
 
+DECK = [0, 1, 2]
+
 class FictitiousPlay:
     def __init__(self, gametree):
         self.gametree = gametree
 
-    def updatePlayerProbabilities(self, player, best_response):
-        n = player.n
-        for i in range(len(player.probabilities)):
-            probabilities = player.probabilities[i]
-            response = best_response[i]
-            for j in range(len(probabilities)):
-                probabilities[j] *= (n / (n + 1))
-                probabilities[j] += response[j] / (n + 1)
-        player.n += 1
-
     def computeEquityByCard(self, player1, player2):
-        equitybycard = []
-        for player2.card in [1, 2, 3]:
+        equitybycard = [0, 0, 0]
+        for player2.card in DECK:
             state = GameState([player1, player2])
             equity = [self.gametree.computeEquity(state) for player2.strategy in player2.strategies]
-            probabilities = player2.probabilities[player2.card - 1]
-            equitybycard += [dot(equity, probabilities) / 3.0]
+            equitybycard[player2.card] = dot(equity, player2.probabilities[player2.card]) / 3.0
         return equitybycard
 
     def computeBestResponse(self, player1, player2):
-        best_response = []
-        for player1.card in [1, 2, 3]:
+        for player1.card in DECK:
+            response = [0] * 4
             equity_by_strategy = []
             for player1.strategy in player1.strategies:
                 equity_by_card = self.computeEquityByCard(player1, player2)
                 equity_by_strategy += [sum(equity_by_card)]
             max_equity = max(equity_by_strategy)
-            response = [0] * 4
             response[equity_by_strategy.index(max_equity)] = 1
-            best_response += [response]
-
-        self.updatePlayerProbabilities(player1, best_response)
+            player1.updateProbabilities(response)
+        player1.n += 1
             
 
 def dot(v1, v2):
@@ -210,6 +199,12 @@ class Player:
         self.probabilities = [[1, 0, 0, 0],
                               [1, 0, 0, 0],
                               [1, 0, 0, 0]]
+
+    def updateProbabilities(self, response):
+        probabilities = self.probabilities[self.card]
+        for i in range(len(probabilities)):
+            probabilities[i] *= (self.n / (self.n + 1))
+            probabilities[i] += response[i] / (self.n + 1)
 
     def nextMove(self):
         self.currentmove += 1
@@ -247,33 +242,30 @@ class Raise:
 
 class Fold:
     def __init__(self):
-        self.equity = [0, 0]
+        self.equity = 0
 
-    def computeEquity(self, gamestate):
-        idx = gamestate.players.index(gamestate.player)
-        self.equity[idx - 0] = -gamestate.player.bet
-        self.equity[idx - 1] =  gamestate.player.bet
-        gamestate.reset()
-        return self.equity[0]
+    def computeEquity(self, state):
+        if state.player == state.players[0]:
+            self.equity = -state.player.bet
+        else:
+            self.equity = state.player.bet
+        state.reset()
+        return self.equity
 
 class Call:
     def __init__(self):
-        self.equity = [0, 0]
+        self.equity = 0
 
-    def computeEquity(self, gamestate):
-        bet = gamestate.player.bet + 1
-        idx = gamestate.players.index(gamestate.player)
-        if gamestate.players[idx].card > gamestate.players[idx - 1].card:
-            self.equity[idx - 0] = bet
-            self.equity[idx - 1] = -bet
-        if gamestate.players[idx].card < gamestate.players[idx - 1].card:
-            self.equity[idx - 0] = -bet
-            self.equity[idx - 1] = bet
-        if gamestate.players[idx].card == gamestate.players[idx - 1].card:
-            self.equity[idx - 0] = 0
-            self.equity[idx - 1] = 0
-        gamestate.reset()        
-        return self.equity[0]
+    def computeEquity(self, state):
+        bet = state.player.bet + 1
+        if state.players[0].card > state.players[1].card:
+            self.equity = bet
+        elif state.players[0].card < state.players[1].card:
+            self.equity = -bet
+        else:
+            self.equity = 0
+        state.reset()
+        return self.equity
 
 
 FOLD = 0
