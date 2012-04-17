@@ -121,7 +121,7 @@ SB 3: [0.0, 0.0, 0.0, 1.0] dot [2,  3, -4, -5] -5
 BB 2:
 
 SB 1: [0.0, 0.0, 0.0, 1.0] dot [2,  3,  4,  5]  5
-SB 2: [0.0, 0.0, 0.0, 1.0] dot [2,  3,  0,  0]  0   0
+SB 2: [0.0, 0.0, 0.0, 1.0] dot [2,  3,  0,  0]  0  0
 SB 3: [0.0, 0.0, 0.0, 1.0] dot [2,  3, -4, -5] -5
 
 BB 3:
@@ -157,115 +157,84 @@ Traversal (Game) State:
  
 """
 
-DECK = [0, 1, 2]
+DECK = list(range(10))
 
 class FictitiousPlay:
     def __init__(self, gametree):
         self.gametree = gametree
 
-    def computeEquityByCard(self, player1, player2):
-        equitybycard = [0, 0, 0]
+    def computeEquityByStrategy(self, player1, player2):
+        equitybycard = [0] * len(DECK)
         for player2.card in DECK:
-            state = GameState([player1, player2])
-            equity = [self.gametree.computeEquity(state) for player2.strategy in player2.strategies]
-            equitybycard[player2.card] = dot(equity, player2.probabilities[player2.card]) / 3.0
-        return equitybycard
+            equity = [self.gametree.computeEquity(GameState(player1, player2)) for player2.strategy in player2.strategies]
+            equitybycard[player2.card] = sum(ev * p for ev, p in zip(equity, player2.probabilities[player2.card]))
+        return sum(equitybycard) / len(DECK)
 
     def computeBestResponse(self, player1, player2):
         for player1.card in DECK:
-            response = [0] * 4
-            equity_by_strategy = []
-            for player1.strategy in player1.strategies:
-                equity_by_card = self.computeEquityByCard(player1, player2)
-                equity_by_strategy += [sum(equity_by_card)]
-            max_equity = max(equity_by_strategy)
-            response[equity_by_strategy.index(max_equity)] = 1
-            player1.updateProbabilities(response)
+            equity = [self.computeEquityByStrategy(player1, player2) for player1.strategy in player1.strategies]
+            player1.updateProbabilities(equity.index(max(equity)))
         player1.n += 1
             
-
-def dot(v1, v2):
-    assert len(v1) == len(v2)
-    return sum([v1[i] * v2[i] for i in range(len(v1))])
-
 class Player:
     def __init__(self):
         self.n = 1.0
         self.bet = 2
         self.card = -1
-        self.currentmove = -1
+        self.action = -1
         self.strategy = None
         self.strategies = None
-        self.probabilities = [[1, 0, 0, 0],
-                              [1, 0, 0, 0],
-                              [1, 0, 0, 0]]
+        self.probabilities = [[1, 0, 0, 0]] * len(DECK)
 
-    def updateProbabilities(self, response):
-        probabilities = self.probabilities[self.card]
-        for i in range(len(probabilities)):
-            probabilities[i] *= (self.n / (self.n + 1))
-            probabilities[i] += response[i] / (self.n + 1)
+    def updateProbabilities(self, best_response):
+        self.probabilities[self.card] = [p * (self.n / (self.n + 1)) for p in self.probabilities[self.card]]
+        self.probabilities[self.card][best_response] += 1.0 / (self.n + 1)
 
-    def nextMove(self):
-        self.currentmove += 1
-        return self.strategy[self.currentmove]
+    def nextAction(self):
+        self.action += 1
+        return self.strategy[self.action]
 
 class GameState:
-    def __init__(self, players):
-        self.players = players
-        self.player = None
-        self.reset()
-
-    def reset(self):
+    def __init__(self, player1, player2):
         self.bet = 0
-        for player in self.players:
-            player.currentmove = -1
-            player.bet = 2
+        self.player = None
+        self.player1 = player1
+        self.player2 = player2
+        self.player1.bet = 2
+        self.player2.bet = 2
+        self.player1.action = -1
+        self.player2.action = -1
 
 class Decision:
     def __init__(self, player, children):
         self.player = player
         self.children = children
 
-    def computeEquity(self, gamestate):
-        gamestate.player = self.player
-        return self.children[self.player.nextMove()].computeEquity(gamestate)
+    def computeEquity(self, state):
+        state.player = self.player
+        return self.children[self.player.nextAction()].computeEquity(state)
 
 class Raise:
     def __init__(self, decision):
         self.decision = decision
 
-    def computeEquity(self, gamestate):
-        gamestate.bet += 1
-        gamestate.player.bet += gamestate.bet
-        return self.decision.computeEquity(gamestate)
+    def computeEquity(self, state):
+        state.bet += 1
+        state.player.bet += state.bet
+        return self.decision.computeEquity(state)
 
 class Fold:
-    def __init__(self):
-        self.equity = 0
-
     def computeEquity(self, state):
-        if state.player == state.players[0]:
-            self.equity = -state.player.bet
-        else:
-            self.equity = state.player.bet
-        state.reset()
-        return self.equity
+        equity = state.player.bet
+        if state.player == state.player1: return -equity
+        return equity
 
 class Call:
-    def __init__(self):
-        self.equity = 0
-
     def computeEquity(self, state):
-        bet = state.player.bet + 1
-        if state.players[0].card > state.players[1].card:
-            self.equity = bet
-        elif state.players[0].card < state.players[1].card:
-            self.equity = -bet
-        else:
-            self.equity = 0
-        state.reset()
-        return self.equity
+        equity = state.player.bet + 1
+        if state.player1.card > state.player2.card: return equity
+        if state.player1.card < state.player2.card: return -equity
+        return 0
 
 
 FOLD = 0
@@ -282,11 +251,7 @@ if __name__ == "__main__":
 
     player1.strategies = SB_STRATEGIES
     player2.strategies = BB_STRATEGIES
-
-    player1.probabilities = [[0, 0, 0, 1],
-                             [0, 0, 0, 1],
-                             [0, 0, 0, 1]]
-
+    player1.probabilities = [[0, 0, 0, 1]] * len(DECK)
 
     gametree = Decision(player1, [Fold(), Call(), Raise(
                 Decision(player2, [Fold(), Call(), Raise(
