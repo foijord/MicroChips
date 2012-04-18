@@ -106,11 +106,11 @@ SB 0 Game Tree:
    | \
    |  call    ev: ( 0, -4, -4) * (1.0, 0.0, 1.0) = -4 -3 = -7
    |
- raise  (ev -9)
+ raise  (ev -1)
    |
-  BB -- fold  ev: ( 4,  4,  4) * (1.0, 0.0, 0.0) = 4 -3 = -1
+  BB -- fold  ev: ( 4,  4,  4) * (1.0, 0.0, 0.0) = 4 
      \
-      call    ev: ( 0, -5, -5) * (0.0, 0.0, 1.0) = -5 -3 = -8
+      call    ev: ( 0, -5, -5) * (0.0, 0.0, 1.0) = -5
 
 SB 1 Game Tree:
 
@@ -183,9 +183,8 @@ class GameState:
         self.probabilities = [1, 1, 1]
 
     def updateMaxEquity(self, node):
-        equity = sum([ev * p for ev, p in zip(node.equity, self.probabilities)])
-        if equity > self.maxequity:
-            self.maxequity = equity
+        if node.average_equity > self.maxequity:
+            self.maxequity = node.average_equity
             self.maxpath = list(self.path + [node])
 
 class Decision:
@@ -195,14 +194,9 @@ class Decision:
 
     def computeEquity(self, state, player1, player2):
         state.player = self.player
+        print(state.player.name)
         for c in self.children:
             c.computeEquity(state, player1, player2)
-
-    def printf(self, state, player1, player2):
-        state.player = self.player
-        print(self.player.name)
-        for c in self.children:
-            c.printf(state, player1, player2)
         
 class Fold:
     def __init__(self, probabilities):
@@ -219,15 +213,15 @@ class Fold:
         p = state.probabilities
         if state.player == player2:
             p = self.probabilities
+
         self.average_equity = sum([i * j for i, j in zip(self.equity, p)])
 
         if state.player == player2:
             state.equity += self.average_equity
         else:
             self.average_equity += state.equity
+            state.updateMaxEquity(self)
 
-    def printf(self, state, player1, player2):
-        p = self.probabilities
         e = self.equity
         print("Fold, ev: [%.2f %.2f %.2f] p: [%.2f, %.2f, %.2f] ev: %d" % (e[0], e[1], e[2], p[0], p[1], p[2], self.average_equity))
 
@@ -254,9 +248,8 @@ class Call:
             state.equity += self.average_equity
         else:
             self.average_equity += state.equity
+            state.updateMaxEquity(self)
 
-    def printf(self, state, player1, player2):
-        p = self.probabilities
         e = self.equity
         print("Call, ev: [%.2f %.2f %.2f] p: [%.2f, %.2f, %.2f] ev: %i" % (e[0], e[1], e[2], p[0], p[1], p[2], self.average_equity))
 
@@ -266,34 +259,41 @@ class Raise:
         self.decision = decision
 
     def computeEquity(self, state, player1, player2):
+        print("Raise")
+        if state.player == player2:
+            print("p: [%.2f, %.2f, %.2f]" % (self.probabilities[0], self.probabilities[1], self.probabilities[2]))
+            print("State ev: %d" % state.equity)
+
         state.betsize += 1
         state.player.bet += state.betsize
+
         if state.player == player2: 
             for i in range(3): state.probabilities[i] *= self.probabilities[i]
+        else:
+            state.path.append(self)
+
         self.decision.computeEquity(state, player1, player2)
 
-    def printf(self, state, player1, player2):
-        p = self.probabilities
-        print("Raise, p: [%.2f, %.2f, %.2f]" % (p[0], p[1], p[2]))
-        self.decision.printf(state, player1, player2)
 
 def computeBestResponse(player1, player2):
     player1.bet = 2
     player2.bet = 2
     state = GameState()
     gametree.computeEquity(state, player1, player2)
-    gametree.printf(state, player1, player2)
+    print("max equity: %d" % state.maxequity)
+    for node in state.maxpath:
+        print(node.__class__)
 
 if __name__ == "__main__":
     player1 = Player("Player1")
     player2 = Player("Player2")
 
     gametree = Decision(player1, [Fold([0, 0, 0]), Raise([1, 1, 1],
-                Decision(player2, [Fold([0, 0, 0]), Call([0, 0, 0]), Raise([0, 0, 0],
+                Decision(player2, [Fold([0, 0, 0]), Call([0, 1, 0]), Raise([1, 0, 1],
                             Decision(player1, [Fold([1, 0, 0]), Call([0, 1, 0]), Raise([0, 0, 1],
-                                        Decision(player2, [Fold([0, 0, 0]), Call([0, 0, 0])]))]))]))])
+                                        Decision(player2, [Fold([1, 0, 0]), Call([0, 0, 1])]))]))]))])
 
 
-    player1.card = 1
-    player2.card = 2
-    computeBestResponse(player2, player1)
+    player1.card = 0
+    player2.card = 0
+    computeBestResponse(player1, player2)
